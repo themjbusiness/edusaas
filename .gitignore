@@ -7,6 +7,7 @@ env/
 
 # Build artifacts
 web/dist/
+web/dev-dist/
 *.egg-info/
 dist/
 build/
@@ -17,6 +18,14 @@ __pycache__/
 *$py.class
 *.sqlite3
 db.sqlite3
+
+# Logs and Session transcripts
+docs/sessions/
+*.jsonl
+*.log
+
+# Obsolete prototypes
+legacy/
 
 # Large raw assets & media temp
 *.pdf

@@ -8,5 +8,11 @@ __pycache__
 *.sqlite3
 node_modules
 web/node_modules
+web/dev-dist
+web/dist
+docs/sessions
+legacy
 *.pdf
+*.jsonl
+*.log
 .DS_Store
