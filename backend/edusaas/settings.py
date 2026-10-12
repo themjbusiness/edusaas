@@ -32,7 +32,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         "CSRF_TRUSTED_ORIGINS",
-        "https://*.up.railway.app,https://*.railway.app,http://localhost:8000,http://127.0.0.1:8000",
+        "https://*.onrender.com,https://*.up.railway.app,https://*.railway.app,http://localhost:8000,http://127.0.0.1:8000",
     ).split(",")
     if origin.strip()
 ]
