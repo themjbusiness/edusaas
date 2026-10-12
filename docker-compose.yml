@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: edusaas
+      POSTGRES_USER: edusaas_user
+      POSTGRES_PASSWORD: edusaas_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../backend.Dockerfile
+    command: >
+      bash -c "python manage.py migrate && 
+               gunicorn edusaas.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    environment:
+      - DATABASE_URL=postgres://edusaas_user:edusaas_password@db:5432/edusaas
+      - DJANGO_SECRET_KEY=production-secret-key-change-me
+      - DJANGO_DEBUG=0
+      - DEMO_MODE=0
+      - DJANGO_ALLOWED_HOSTS=*
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      dockerfile: ../web.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,0 +1,161 @@
+{
+  "key": "40da483153392797",
+  "source": "authored",
+  "meta": {
+    "source": "u1-dimensions.json"
+  },
+  "script": {
+    "sections": [
+      {
+        "page": 11,
+        "text": "Hello again! Let's move on to topic 1.3: Dimensions of Physical Quantities. Please turn to page 11."
+      },
+      {
+        "page": 11,
+        "text": "The dimension of a physical quantity reveals its fundamental nature, regardless of the units used to measure it. For example, length, height, radius, and displacement are all measured in meters, because their fundamental nature is the same. Therefore, they all share the exact same dimension, which we denote simply as L."
+      },
+      {
+        "page": 11,
+        "text": "Dimensions are always written as capital letters enclosed within square brackets. Look at Table 1.3: mass is denoted by [M], length by [L], time by [T], electric current by [I], thermodynamic temperature by [θ] (theta), luminous intensity by [J], and the amount of a substance by [N]."
+      },
+      {
+        "page": 11,
+        "text": "The dimensions of derived quantities are found by multiplying or dividing the base dimensions. For instance, area is [L²], volume is [L³], velocity is [LT⁻¹], and acceleration is [LT⁻²]."
+      },
+      {
+        "page": 12,
+        "text": "On page 12, there are four important terms you need to understand. First, dimensional variables: these are quantities that have dimensions but their numerical values vary, such as velocity and force. Second, dimensional constants: these have dimensions but their numerical values are fixed, such as Planck's constant h, the gravitational constant G, and the speed of light c."
+      },
+      {
+        "page": 12,
+        "text": "Third, we have dimensionless variables. These have no dimensions, yet their values can change, like an angle, strain, or the coefficient of friction. Fourth, dimensionless constants. These are purely numbers with no dimensions and a fixed value, such as 1, 2, π (pi), and e."
+      },
+      {
+        "page": 12,
+        "text": "Now let's discuss the advantages of dimensional analysis. The first advantage is checking the homogeneity of physical equations. The principle of homogeneity states that the dimensions on both sides of a valid equation must be exactly identical. If they are not, the equation is physically incorrect."
+      },
+      {
+        "page": 12,
+        "text": "For example, consider the equation for final velocity: v_f equals v_i plus a t. The left side (velocity) has the dimension [LT⁻¹]. On the right side, the term 'a t' has the dimension of acceleration [LT⁻²] multiplied by time [T], which simplifies to [LT⁻¹]. Since all terms on both sides match, the equation is dimensionally correct."
+      },
+      {
+        "page": 13,
+        "text": "The second major advantage is deriving formulas. On page 13, the book derives the de Broglie wavelength lambda, assuming it depends on Planck's constant h, mass m, and velocity v. By assigning unknown powers a, b, and c to these variables, we can balance the powers of M, L, and T on both sides of the equation."
+      },
+      {
+        "page": 13,
+        "text": "By solving the simultaneous equations, we find that a equals 1, b equals negative 1, and c equals negative 1. This gives us the derived formula: lambda equals a constant multiplied by h, divided by the product of m and v."
+      },
+      {
+        "page": 13,
+        "text": "Next are the limitations of dimensional analysis, which are frequently asked in exams. First, it cannot differentiate between quantities that have identical dimensions, such as work, energy, and torque, which all share the dimension [ML²T⁻²]. Second, it cannot be used to derive formulas involving trigonometric, exponential, or logarithmic functions. Third, it cannot determine the value of dimensionless constants. Fourth, while a dimensionally incorrect equation is always wrong, a dimensionally correct equation is not guaranteed to be physically correct."
+      },
+      {
+        "page": 14,
+        "text": "Example 1.2 derives the time period of a simple pendulum using this method. When solving, the dependence on the mass of the bob becomes zero, showing it doesn't affect the time period. The final derived relation is T equals a constant multiplied by the square root of l over g. Experimental data shows this constant is 2π. Please proceed to the quiz now, and good luck!"
+      }
+    ],
+    "quiz": [
+      {
+        "question": "The dimensions of acceleration are:",
+        "options": [
+          "[LT⁻¹]",
+          "[LT⁻²]",
+          "[L²T⁻¹]",
+          "[MLT⁻²]"
+        ],
+        "answer": 1,
+        "explanation": "Acceleration = velocity / time = [LT⁻¹]/[T] = [LT⁻²]."
+      },
+      {
+        "question": "The dimension symbol for temperature is:",
+        "options": [
+          "[T]",
+          "[K]",
+          "[θ]",
+          "[N]"
+        ],
+        "answer": 2,
+        "explanation": "Table 1.3: temperature is [θ]. [T] is time and [N] is amount of substance."
+      },
+      {
+        "question": "Planck’s constant (h) is an example of a:",
+        "options": [
+          "Dimensional variable",
+          "Dimensional constant",
+          "Dimensionless variable",
+          "Dimensionless constant"
+        ],
+        "answer": 1,
+        "explanation": "It has dimensions and a fixed value, so it is a dimensional constant."
+      },
+      {
+        "question": "Which of these is a dimensionless constant?",
+        "options": [
+          "π",
+          "Speed of light",
+          "Strain",
+          "Velocity"
+        ],
+        "answer": 0,
+        "explanation": "π, e and pure numbers have no dimensions and a fixed value."
+      },
+      {
+        "question": "The principle of homogeneity says that:",
+        "options": [
+          "Both sides of an equation must have the same dimensions",
+          "All quantities must have the same units",
+          "Constants can be ignored",
+          "Equations must be linear"
+        ],
+        "answer": 0,
+        "explanation": "An equation is physically correct only if both sides have the same dimensions."
+      },
+      {
+        "question": "Work, energy and torque all have the dimensions:",
+        "options": [
+          "[MLT⁻²]",
+          "[ML²T⁻²]",
+          "[ML²T⁻³]",
+          "[ML⁻¹T⁻²]"
+        ],
+        "answer": 1,
+        "explanation": "This is limitation 1: dimensional analysis cannot tell these apart."
+      },
+      {
+        "question": "Using dimensional analysis, the de Broglie wavelength is found to be:",
+        "options": [
+          "λ ∝ hmv",
+          "λ ∝ h/mv",
+          "λ ∝ mv/h",
+          "λ ∝ hv/m"
+        ],
+        "answer": 1,
+        "explanation": "Solving gives a = 1, b = −1, c = −1, so λ = constant × h/(mv)."
+      },
+      {
+        "question": "Dimensional analysis CANNOT be used to:",
+        "options": [
+          "Check if an equation is homogeneous",
+          "Derive a possible formula",
+          "Find the dimensionless constant in a formula",
+          "Find the units of a quantity"
+        ],
+        "answer": 2,
+        "explanation": "Limitation 3: it cannot determine the dimensionless constant, such as 2π for a pendulum."
+      },
+      {
+        "question": "For a simple pendulum, dimensional analysis shows the time period does NOT depend on:",
+        "options": [
+          "Length",
+          "g",
+          "Mass of the bob",
+          "Any of these"
+        ],
+        "answer": 2,
+        "explanation": "The power of mass comes out as zero, so T = constant × √(l/g)."
+      }
+    ],
+    "review_notes": []
+  }
+}

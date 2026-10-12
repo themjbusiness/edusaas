@@ -1,0 +1,165 @@
+{
+  "key": "d605451624427024",
+  "source": "authored",
+  "meta": {
+    "source": "u1-estimation.json"
+  },
+  "script": {
+    "sections": [
+      {
+        "page": 8,
+        "text": "Hello students! Today we are starting Unit 1, Physical Quantities and Measurements. Please turn to page 8."
+      },
+      {
+        "page": 8,
+        "text": "Physics is fundamentally based on experimental observations. There are two main types of observations: qualitative and quantitative. Qualitative observations describe qualities without numbers, such as color, shape, or texture. Quantitative observations, on the other hand, involve numerical values and units, and these are what we call measurements."
+      },
+      {
+        "page": 8,
+        "text": "Let's dive into topic 1.1: Estimation. In our daily lives, we often ask ourselves questions like: How tall is that building? Or how long will this download take? We answer these questions using estimation."
+      },
+      {
+        "page": 8,
+        "text": "Here is the key definition to remember: 'An estimation is a rough educated guess of the value of a physical quantity by using prior experience and sound physical reasoning.' This means an estimation is not a random guess, but a logical approximation based on your experience and scientific principles."
+      },
+      {
+        "page": 8,
+        "text": "The first strategy is the estimation of length. You can use any familiar object as a makeshift ruler. For example, to estimate a building's height, count the number of floors, estimate the height of a single floor based on your experience, and multiply the two together."
+      },
+      {
+        "page": 8,
+        "text": "The reverse approach also works brilliantly for very small objects. If you need to find the thickness of a single sheet of paper, measure the total thickness of a stack of paper and then divide that by the total number of pages."
+      },
+      {
+        "page": 9,
+        "text": "Now look at Table 1.1 on page 9. It provides typical scales for length, mass, and time, expressed in powers of ten. For instance, the diameter of a proton is incredibly small, about ten to the power of negative fifteen meters, whereas the Earth's diameter is huge, about ten to the power of seven meters."
+      },
+      {
+        "page": 9,
+        "text": "In the mass column, an electron's mass is around ten to the power of negative thirty kilograms, while a liter of water is approximately one kilogram. For time, a single day is roughly ten to the power of five seconds, and a year is about ten to the power of seven seconds."
+      },
+      {
+        "page": 9,
+        "text": "Our second strategy deals with area and volume. To estimate these, treat complex objects as simple geometric shapes, like a sphere or a rectangular box, and then apply standard geometric formulas to find their approximate volume."
+      },
+      {
+        "page": 9,
+        "text": "The third strategy is estimating mass from volume and density. The formula is simply: Mass equals density multiplied by volume. Keep these reference values in mind: the density of air is roughly one kilogram per cubic meter, water is ten to the power of three, and most dense everyday solids are around ten to the power of four kilograms per cubic meter."
+      },
+      {
+        "page": 10,
+        "text": "Let's look at Example 1.1 on page 10. How much energy does an adult require to climb the stairs from the ground floor to the first floor? We use the potential energy formula: Energy equals mass times gravitational acceleration times height (E = mgh)."
+      },
+      {
+        "page": 10,
+        "text": "Our estimated values are: mass is seventy kilograms, g is approximately ten meters per second squared, and the height is three meters. Multiplying these gives: seventy times ten times three, which equals two thousand one hundred joules."
+      },
+      {
+        "page": 10,
+        "text": "Now try Assignment 1.1 on your own: If a supercomputer performs one operation in ten to the power of negative seventeen seconds, how many operations will it perform in one day? Hint: One day is roughly ten to the power of five seconds. Once you're ready, please take the quiz. Good luck!"
+      }
+    ],
+    "quiz": [
+      {
+        "question": "An estimation is best described as:",
+        "options": [
+          "A random guess",
+          "A rough educated guess based on experience and physical reasoning",
+          "An exact measurement",
+          "A formula found by trial"
+        ],
+        "answer": 1,
+        "explanation": "The book defines estimation as a rough educated guess using prior experience and sound physical reasoning."
+      },
+      {
+        "question": "Which of these is a qualitative observation?",
+        "options": [
+          "Mass of a book is 1 kg",
+          "Colour of a flower",
+          "Speed of a car is 20 m/s",
+          "Time of a race is 12 s"
+        ],
+        "answer": 1,
+        "explanation": "Qualitative observations have no numbers attached, such as colour, shape or texture."
+      },
+      {
+        "question": "A quantitative observation is also called:",
+        "options": [
+          "An estimation",
+          "A hypothesis",
+          "A measurement",
+          "A dimension"
+        ],
+        "answer": 2,
+        "explanation": "A quantitative observation includes numbers and is also called a measurement."
+      },
+      {
+        "question": "To estimate the thickness of one sheet of paper, you should:",
+        "options": [
+          "Measure one sheet with a metre rule",
+          "Divide the thickness of a stack by the number of sheets",
+          "Multiply the stack thickness by the number of sheets",
+          "Weigh the sheet"
+        ],
+        "answer": 1,
+        "explanation": "Estimate a small thing by measuring many of them together, then divide."
+      },
+      {
+        "question": "According to Table 1.1, the order of magnitude of one day is:",
+        "options": [
+          "10³ s",
+          "10⁵ s",
+          "10⁷ s",
+          "10⁹ s"
+        ],
+        "answer": 1,
+        "explanation": "One day is 86,400 s, about 10⁵ s."
+      },
+      {
+        "question": "The approximate density of water is:",
+        "options": [
+          "1 kg m⁻³",
+          "10 kg m⁻³",
+          "10³ kg m⁻³",
+          "10⁴ kg m⁻³"
+        ],
+        "answer": 2,
+        "explanation": "Water is about 1000 kg m⁻³ = 10³ kg m⁻³. Air is about 1 kg m⁻³."
+      },
+      {
+        "question": "A 70 kg person climbs 3 m (g ≈ 10 m s⁻²). The energy needed is about:",
+        "options": [
+          "210 J",
+          "700 J",
+          "2100 J",
+          "21000 J"
+        ],
+        "answer": 2,
+        "explanation": "E = mgh = 70 × 10 × 3 = 2100 J (Example 1.1)."
+      },
+      {
+        "question": "To estimate mass from volume, you multiply the volume by:",
+        "options": [
+          "Weight",
+          "Density",
+          "Area",
+          "Acceleration"
+        ],
+        "answer": 1,
+        "explanation": "mass = density × volume."
+      },
+      {
+        "question": "To estimate the height of a building, the book suggests first:",
+        "options": [
+          "Counting the number of floors",
+          "Measuring its shadow",
+          "Weighing the bricks",
+          "Timing a falling stone"
+        ],
+        "answer": 0,
+        "explanation": "Count the floors, estimate one floor’s height, then multiply."
+      }
+    ],
+    "review_notes": []
+  }
+}

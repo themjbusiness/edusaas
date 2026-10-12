@@ -1,0 +1,3 @@
+output/*/lessons/*/sections/
+__pycache__/
+.pytest_cache/

@@ -1,0 +1,23 @@
+{
+  "id": "phy11",
+  "pdf": "../../2728-11th Class Physics New Federal Text Book PDF-(taleem360.com) (1).pdf",
+  "pdf_page_offset": 0,
+  "subject": "Physics",
+  "grade": "Grade 11",
+  "board": "FBISE",
+  "publisher": "National Book Foundation (Federal Textbook Board)",
+  "voice": "en-IN-PrabhatNeural",
+  "rate": "+0%",
+  "units": [
+    {
+      "id": "u1",
+      "number": 1,
+      "title": "Physical Quantities and Measurements",
+      "lessons": [
+        { "id": "u1-estimation", "topic": "1.1", "title": "Estimation of Physical Quantities", "pages": [8, 9, 10] },
+        { "id": "u1-derived-units", "topic": "1.2", "title": "Derived Units in Terms of Base Units", "pages": [10, 11] },
+        { "id": "u1-dimensions", "topic": "1.3", "title": "Dimensions of Physical Quantities", "pages": [11, 12, 13, 14] }
+      ]
+    }
+  ]
+}

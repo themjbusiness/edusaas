@@ -1,0 +1,142 @@
+{
+  "key": "cf8a520ea8591eca",
+  "source": "authored",
+  "meta": {
+    "source": "u1-derived-units.json"
+  },
+  "script": {
+    "sections": [
+      {
+        "page": 10,
+        "text": "Hello students! Welcome to topic 1.2: Derived Units in Terms of Base Units. Please look at the lower half of page 10."
+      },
+      {
+        "page": 10,
+        "text": "In Grade 9, you learned that certain quantities are considered fundamental or base quantities. These include mass, length, and time, and their corresponding SI base units are the kilogram, meter, and second. All other physical quantities are known as derived quantities. Their units are formed by mathematically multiplying or dividing these base units."
+      },
+      {
+        "page": 10,
+        "text": "Let's look at our first example: Force. The equation for force is mass times acceleration. We know acceleration is velocity divided by time, and velocity is displacement divided by time. Therefore, expanding it fully, force equals mass times displacement, divided by time squared."
+      },
+      {
+        "page": 10,
+        "text": "Now, let's substitute the SI base units into this expanded formula: we use kilogram for mass, meter for displacement, and second for time. Thus, one newton of force is exactly equal to one kilogram meter per second squared (kg m s⁻²)."
+      },
+      {
+        "page": 10,
+        "text": "Our second example is Work. Work is defined as force multiplied by displacement. If we replace force with our previous derivation (mass times displacement divided by time squared), we find that work equals mass times displacement squared, divided by time squared."
+      },
+      {
+        "page": 11,
+        "text": "Please turn to page 11. Following our derivation, one joule of work is equivalent to a kilogram times meter squared, per second squared (kg m² s⁻²)."
+      },
+      {
+        "page": 11,
+        "text": "Now examine Table 1.2. It lists several common derived units. For example, the unit of power is the watt, which is defined as joules per second. Substituting our base units for joules, a watt becomes kg m² s⁻³."
+      },
+      {
+        "page": 11,
+        "text": "Another example is pressure. Its unit is the pascal, defined as newtons per square meter. In base units, a pascal is kg m⁻¹ s⁻²."
+      },
+      {
+        "page": 11,
+        "text": "Finally, the unit for electric charge is the coulomb, which is defined as an ampere multiplied by a second. Note that the ampere itself is a fundamental base unit for electric current."
+      },
+      {
+        "page": 11,
+        "text": "Here is the key trick to remember: to find the base units of any derived quantity, write down its defining formula, break every term down into base quantities, and then substitute their SI units. You're now ready for the quiz!"
+      }
+    ],
+    "quiz": [
+      {
+        "question": "The newton (N) in terms of SI base units is:",
+        "options": [
+          "kg m s⁻¹",
+          "kg m s⁻²",
+          "kg m² s⁻²",
+          "kg m⁻¹ s⁻²"
+        ],
+        "answer": 1,
+        "explanation": "F = ma, so N = kg × m s⁻² = kg m s⁻²."
+      },
+      {
+        "question": "The joule (J) in terms of SI base units is:",
+        "options": [
+          "kg m s⁻²",
+          "kg m² s⁻³",
+          "kg m² s⁻²",
+          "kg m⁻² s²"
+        ],
+        "answer": 2,
+        "explanation": "Work = force × displacement, so J = N m = kg m² s⁻²."
+      },
+      {
+        "question": "The watt (W) is equal to:",
+        "options": [
+          "J s",
+          "J s⁻¹",
+          "N m⁻²",
+          "A s"
+        ],
+        "answer": 1,
+        "explanation": "Power is work per unit time, so W = J s⁻¹ = kg m² s⁻³."
+      },
+      {
+        "question": "The pascal (Pa) in base units is:",
+        "options": [
+          "kg m⁻¹ s⁻²",
+          "kg m s⁻²",
+          "kg m² s⁻³",
+          "kg m⁻² s⁻¹"
+        ],
+        "answer": 0,
+        "explanation": "Pa = N m⁻² = kg m s⁻² × m⁻² = kg m⁻¹ s⁻²."
+      },
+      {
+        "question": "The coulomb (C) is equal to:",
+        "options": [
+          "A s⁻¹",
+          "A s",
+          "J A⁻¹",
+          "V A"
+        ],
+        "answer": 1,
+        "explanation": "Charge = current × time, so C = A s."
+      },
+      {
+        "question": "Derived units are obtained by:",
+        "options": [
+          "Adding base units",
+          "Multiplying or dividing base units",
+          "Subtracting base units",
+          "Measuring them directly"
+        ],
+        "answer": 1,
+        "explanation": "Derived units are products or quotients of the SI base units."
+      },
+      {
+        "question": "kg m² s⁻³ is the base-unit form of:",
+        "options": [
+          "Force",
+          "Work",
+          "Power",
+          "Pressure"
+        ],
+        "answer": 2,
+        "explanation": "Power: W = J s⁻¹ = kg m² s⁻³."
+      },
+      {
+        "question": "Which of these is an SI base unit?",
+        "options": [
+          "newton",
+          "joule",
+          "ampere",
+          "watt"
+        ],
+        "answer": 2,
+        "explanation": "The ampere is a base unit. Newton, joule and watt are derived."
+      }
+    ],
+    "review_notes": []
+  }
+}
