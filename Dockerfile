@@ -43,8 +43,9 @@ COPY --from=frontend-builder /app/web/dist /app/web/dist
 # Set working directory to backend
 WORKDIR /app/backend
 
-# Railway sets the PORT env var automatically
-EXPOSE 8000
+# Render expects web services to listen on port 10000 by default
+ENV PORT=10000
+EXPOSE 10000
 
-# Start script: run migrations, seed demo data, start gunicorn on $PORT
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py seed_demo --admin-password demo-admin-2026 && gunicorn edusaas.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2"]
+# Start script: run migrations, collect static, seed demo data, start gunicorn on $PORT (10000)
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py seed_demo --admin-password demo-admin-2026 && gunicorn edusaas.wsgi:application --bind 0.0.0.0:${PORT:-10000} --workers 2 --access-logfile - --error-logfile -"]
