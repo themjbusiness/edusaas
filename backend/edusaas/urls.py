@@ -12,6 +12,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("admin", RedirectView.as_view(url="/admin/")),
     path("api/", include("lms.urls")),
+    re_path(r"^static/(?P<path>.+)$", frontend.serve_static),
     re_path(r"^media/(?P<path>.+)$", frontend.serve_media),
     re_path(r"^app(/.*)?$", RedirectView.as_view(url="/")),  # the new app was previewed at /app/ before the switch-over
     re_path(r"^(?P<path>.*)$", frontend.serve),

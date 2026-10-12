@@ -29,6 +29,11 @@ def serve_media(request, path):
     return _serve(request, path, Path(settings.MEDIA_DIR).resolve(), fallback=False, media=True)
 
 
+def serve_static(request, path):
+    """Django static files (admin CSS, JS, fonts) from settings.STATIC_ROOT."""
+    return _serve(request, path, Path(settings.STATIC_ROOT).resolve(), fallback=False)
+
+
 def _serve(request, path, root, fallback=True, media=False):
     target = (root / (path or "index.html")).resolve()
     if root not in target.parents and target != root:

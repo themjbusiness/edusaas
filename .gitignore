@@ -43,3 +43,7 @@ test-results/
 playwright-report/
 web/test-results/
 web/playwright-report/
+scratch/
+web/scratch/
+staticfiles/
+backend/staticfiles/

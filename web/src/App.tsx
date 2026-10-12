@@ -92,12 +92,24 @@ export default function App() {
   if (route.name === 'gallery') return <Layout><Gallery /></Layout>;
   if (route.name === 'logout') { if (hasToken || me) signOut(); else go('#/login'); return null; }
   if (!hasToken) {
-    if (route.name !== 'login') { go('#/login'); return null; }
+    if (route.name !== 'login') go('#/login');
     return <Layout><Login onSignedIn={onSignedIn} /></Layout>;
   }
-  if (!me) return <Layout>{loadError ? <ErrorCard error={loadError} /> : <Skeleton rows={2} />}</Layout>;
+  if (!me) return <Layout>{loadError ? <ErrorCard error={loadError} onRetry={() => { setToken(null); setHasToken(false); go('#/login'); }} /> : <Skeleton rows={2} />}</Layout>;
   const def = ROUTES[route.name];
-  if (!def || !def.roles.includes(me.role)) { go(HOME[me.role]); return null; }
+  if (!def || !def.roles.includes(me.role)) {
+    const homeRoute = HOME[me.role];
+    go(homeRoute);
+    const homeName = homeRoute.replace(/^#\/?/, '');
+    const HomeScreen = ROUTES[homeName]?.screen || Login;
+    return (
+      <SessionCtx.Provider value={{ me, setMe, signOut }}>
+        <Layout route={{ name: homeName, args: [] }}>
+          <HomeScreen key={homeName} args={[]} />
+        </Layout>
+      </SessionCtx.Provider>
+    );
+  }
   const Screen = def.screen;
   return (
     <SessionCtx.Provider value={{ me, setMe, signOut }}>
