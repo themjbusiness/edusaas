@@ -924,6 +924,17 @@ class UrduLanguage(ApiBase):
 class UrduNarration(ApiBase):
     """F12: the Urdu narration track."""
 
+    def setUp(self):
+        super().setUp()
+        from .models import Lesson
+        lesson = Lesson.objects.get(id=LESSON)
+        if not lesson.ur_audio:
+            lesson.ur_audio = 'lessons/u1-estimation/audio-ur.mp3'
+            lesson.ur_sections = [{'page': 8, 'text': 'السلام علیکم طلباء', 'start': 0}]
+            lesson.ur_duration_sec = 268.0
+            lesson.ur_review_status = 'draft'
+            lesson.save()
+
     def listen(self, token, track, n=400):
         prog, _ = LessonProgress.objects.get_or_create(student=User.objects.get(phone_number_hash=hash_phone(ALI)), lesson_id=LESSON)
         LessonProgress.objects.filter(pk=prog.pk).update(updated_at=timezone.now() - timedelta(hours=1))

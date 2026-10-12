@@ -57,5 +57,12 @@ export default defineConfig({
   ],
   server: { port: 5173, proxy: { '/api': django, '/media': django } },
   build: { outDir: 'dist', sourcemap: false, target: 'es2019' },
-  test: { environment: 'jsdom', globals: true, setupFiles: './src/test-setup.ts', css: false },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test-setup.ts',
+    css: false,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['e2e/**', 'node_modules/**']
+  },
 });

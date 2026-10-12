@@ -63,8 +63,9 @@ def request_otp(phone):
     if user.role not in (User.STUDENT, User.TEACHER, User.PARENT, User.COLLEGE_ADMIN):
         raise ApiError(403, "use_admin", "Admin accounts sign in at /admin.")
     hour_ago = timezone.now() - timedelta(hours=1)
-    if OTPCode.objects.filter(phone_number=phone, created_at__gte=hour_ago).count() >= settings.OTP_MAX_PER_HOUR:
-        raise ApiError(429, "too_many_codes", "Too many codes requested. Please try again in an hour.")
+    if not (settings.DEMO_MODE and phone.startswith("+92399")):
+        if OTPCode.objects.filter(phone_number=phone, created_at__gte=hour_ago).count() >= settings.OTP_MAX_PER_HOUR:
+            raise ApiError(429, "too_many_codes", "Too many codes requested. Please try again in an hour.")
     OTPCode.objects.filter(phone_number=phone, used=False).update(used=True)  # only the newest code works
     code = f"{secrets.randbelow(10 ** 6):06d}"
     OTPCode.objects.create(phone_number=phone, code_hash=_hash(phone, code),

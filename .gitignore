@@ -37,3 +37,9 @@ Thumbs.db
 .env.local
 .vscode/
 .idea/
+
+# Test artifacts
+test-results/
+playwright-report/
+web/test-results/
+web/playwright-report/
