@@ -31,6 +31,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        navigateFallbackDenylist: [/^\/admin/, /^\/api/, /^\/static/],
         // Cache API responses and media assets
         runtimeCaching: [
           {
@@ -55,7 +56,15 @@ export default defineConfig({
       }
     })
   ],
-  server: { port: 5173, proxy: { '/api': django, '/media': django } },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': django,
+      '/media': django,
+      '/admin': django,
+      '/static': django
+    }
+  },
   build: { outDir: 'dist', sourcemap: false, target: 'es2019' },
   test: {
     environment: 'jsdom',
