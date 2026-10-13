@@ -1,29 +1,27 @@
 # EduSaas Active Session Handover
 
-**Last Updated:** 2026-10-13 10:45 PKT  
-**Branch:** `main`  
-**Current Status:** All backend tests green (80 tests passing). Phone-based Django `/admin` authentication implemented and tested.
+**Last Updated:** 2026-10-13 15:40 PKT  
+**Branch:** `release/v1.2-pilot-features` (Isolated release branch)  
+**Current Status:** All backend tests green (80 tests passing). Completed Master Implementation Plan and individual feature specs for all v1.2 Pilot Term features.
 
 ---
 
-## 1. Session Context & Where We Left Off
+## 1. Session Context & Active Work
 
-EduSaas is an AI-powered interactive LMS for private FBISE colleges (absence -> textbook audio lesson -> quiz >=80% -> clearance loop).
+EduSaas is preparing the **v1.2 Pilot Term Release** containing 5 core features to support live college pilots:
+- **F7: Teacher Content Review Screen**
+- **F9: Mastery Remediation Paths**
+- **F10: Principal Analytics Dashboard**
+- **F11: Teacher Weekly At-Risk Digest**
+- **F8: Full FBISE 11th Syllabus Production Pipeline**
 
-### Recently Completed Milestones
-1. **Django `/admin` Phone Number Authentication**:
-   - `lms.auth.PhoneBackend`: Superusers and staff can log in using normalized phone numbers (`0399...`, `+92399...`, or raw hashes) and passwords.
-   - `PhoneAdminAuthenticationForm`: Configured on `admin.site.login_form` with phone number labels and Pakistani phone placeholders.
-   - `backend/edusaas/settings.py`: Added `PhoneBackend` to `AUTHENTICATION_BACKENDS` and configured `LOGIN_REDIRECT_URL = "/admin/"`.
-   - `backend/lms/tests.py`: Added `PhoneAdminAuthTest` suite covering all formats, invalid credentials, and non-staff restrictions.
-2. **Django Admin Static Assets & SPA Routing**:
-   - Resolved static asset 404s and proxy routing so `/admin/` assets are served correctly alongside the Vite React frontend.
-3. **PWA Service Worker Navigation Safeguards**:
-   - Excluded `/admin`, `/api`, and `/static` from Vite PWA service worker navigation fallback.
-4. **CI & Playwright E2E Testing**:
-   - GitHub Actions workflow (`.github/workflows/ci.yml`) and full Playwright end-to-end tests (`web/e2e/app.spec.ts`).
-5. **Render Cloud Deployment**:
-   - Production Dockerfile, Render blueprint (`render.yaml`), port 10000 binding, static collection, and CSRF configuration.
+### Created Documentation:
+- Master Implementation Plan: `docs/v1.2-pilot-features-implementation-plan.md`
+- Feature Specs:
+  - `docs/features/F7-teacher-review.md`
+  - `docs/features/F9-mastery-path.md`
+  - `docs/features/F10-principal-dashboard.md`
+  - `docs/features/F11-teacher-weekly-report.md`
 
 ---
 
@@ -34,16 +32,13 @@ EduSaas is an AI-powered interactive LMS for private FBISE colleges (absence -> 
 
 ---
 
-## 3. Immediate Next Steps & Remaining Roadmap
+## 3. Immediate Implementation Order
 
-### High-Priority Next Items:
-1. **Teacher Content Review Screen (F7)**:
-   - Provide an in-app review dashboard where teachers can listen to generated audio section-by-section, edit transcripts and MCQs, and approve lessons before release.
-2. **Full Syllabus Production Pipeline (F8)**:
-   - Scale Content Factory from Physics Unit 1 to full 11th grade subjects (Chemistry, Biology, Mathematics).
-3. **Mastery Remediation Paths (F9)**:
-   - Implement review loops and alternative MCQ sets when students fail quizzes below 80%.
-4. **Principal Analytics Console (F10)**:
-   - High-level dashboards for college principals tracking absentee clearance times and attendance trends.
-5. **Teacher Weekly Reports (F11)**:
-   - Automated digest flagging persistently absent or struggling students.
+1. **Sprint 1A**: F7 (Teacher Content Review Screen)
+   - Step 1: Update `Lesson` model with review status, notes, and reviewer foreign key.
+   - Step 2: Implement `/api/review/` endpoints in `backend/lms/views.py`.
+   - Step 3: Write test suite in `backend/lms/tests.py` covering teacher access and student draft-hiding.
+   - Step 4: Build React review screen with waveform/audio segments and MCQ editor.
+2. **Sprint 1B**: F9 (Mastery Remediation Paths)
+3. **Sprint 2A**: F10 (Principal Analytics Dashboard)
+4. **Sprint 2B**: F11 (Teacher Weekly At-Risk Report)
