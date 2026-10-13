@@ -1023,3 +1023,60 @@ class OfflineSyncApi(ApiBase):
         # Verify progress was saved
         _, prog_data = self.call("get", f"lessons/{LESSON}", token=t)
         self.assertGreater(prog_data["progress"]["heardShare"], 0)
+
+
+class PhoneAdminAuthTest(ApiBase):
+    def test_phone_backend_authentication(self):
+        from django.contrib.auth import authenticate
+        # 1. Superuser authenticates with E.164 phone
+        user = authenticate(username="+923999990000", password="x" * 12)
+        self.assertIsNotNone(user)
+        self.assertTrue(user.is_superuser)
+
+        # 2. Local format (03999990000)
+        user_local = authenticate(username="03999990000", password="x" * 12)
+        self.assertEqual(user_local, user)
+
+        # 3. Spaces in phone number
+        user_spaced = authenticate(username="+92 399 999 0000", password="x" * 12)
+        self.assertEqual(user_spaced, user)
+
+        # 4. Raw hash
+        user_hash = authenticate(username=user.phone_number_hash, password="x" * 12)
+        self.assertEqual(user_hash, user)
+
+        # 5. Wrong password returns None
+        self.assertIsNone(authenticate(username="+923999990000", password="wrongpassword"))
+
+        # 6. Non-existent phone returns None
+        self.assertIsNone(authenticate(username="+923990000000", password="x" * 12))
+
+    def test_admin_login_view_with_phone(self):
+        # 1. Login directly through Django admin login view
+        response = self.client.post("/admin/login/", {
+            "username": "03999990000",
+            "password": "x" * 12,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/admin/")
+
+        # 2. Login with ?next=/admin/lms/user/
+        response_next = self.client.post("/admin/login/?next=/admin/lms/user/", {
+            "username": "+923999990000",
+            "password": "x" * 12,
+        })
+        self.assertEqual(response_next.status_code, 302)
+        self.assertEqual(response_next["Location"], "/admin/lms/user/")
+
+
+    def test_admin_login_rejects_non_staff_user(self):
+        student = User.objects.get(phone_number_hash=hash_phone(ALI))
+        student.set_password("studentpass123")
+        student.save()
+
+        response = self.client.post("/admin/login/", {
+            "username": ALI,
+            "password": "studentpass123",
+        })
+        self.assertEqual(response.status_code, 200)
+

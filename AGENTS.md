@@ -30,3 +30,12 @@ EduSaas is a B2B SaaS for private FBISE intermediate colleges. The core loop is:
 - **Security**: Never expose user PII or allow cross-college data access. Write tests for access rules.
 - **Architecture**: Stick to the Django backend and React frontend structure. Do not introduce new massive dependencies unless strictly required.
 - **Context**: Always check the `docs/` folder for existing specs and the `Change-Register-v1.1.md` before making architectural decisions.
+
+## Session Continuity & Memory Handover
+- **Always read `docs/ACTIVE_SESSION.md`**: At the start of any conversation or after an IDE restart/reload, immediately inspect `docs/ACTIVE_SESSION.md` and `git status` to seamlessly recover full context of where the user left off.
+- **Maintain `docs/ACTIVE_SESSION.md`**: Whenever a milestone, feature, or work session is completed, update `docs/ACTIVE_SESSION.md` with:
+  1. What was completed and tested.
+  2. Any in-progress work or known blockers.
+  3. Immediate next roadmap steps.
+- This ensures session memory is preserved locally in the workspace and online via Git across all IDE reboots and new conversation windows.
+

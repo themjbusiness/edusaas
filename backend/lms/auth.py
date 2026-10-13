@@ -8,6 +8,7 @@ import secrets
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.auth.backends import ModelBackend
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
@@ -143,3 +144,21 @@ def api(methods=("GET",), roles=None):
                                     status=500)
         return view
     return wrap
+
+
+class PhoneBackend(ModelBackend):
+    """Allow superusers/staff to log into /admin using their plain phone number or hash."""
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        if username is None:
+            username = kwargs.get(User.USERNAME_FIELD)
+        if not username or not password:
+            return None
+        try:
+            phone_hash = hash_phone(normalize_phone(username))
+        except Exception:
+            phone_hash = username
+        user = User.objects.filter(phone_number_hash=phone_hash).first()
+        if user and user.check_password(password) and self.user_can_authenticate(user):
+            return user
+        return None
+

@@ -1,10 +1,22 @@
 """College admin panel (blueprint US 3.3): manage the roster that decides who can log in."""
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import (Attendance, Clearance, College, Lesson, LessonProgress, Notification, QuizAttempt, SchoolClass,
                      StudentProfile, Subject, SubjectRequest, TeachingAssignment, Unit, User)
+
+
+class PhoneAdminAuthenticationForm(AdminAuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "username" in self.fields:
+            self.fields["username"].label = "Phone number"
+            self.fields["username"].widget.attrs["placeholder"] = "+92 399 9990000"
+
+
+admin.site.login_form = PhoneAdminAuthenticationForm
 
 
 class StudentProfileInline(admin.StackedInline):

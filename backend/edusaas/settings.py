@@ -118,6 +118,11 @@ if SENTRY_DSN:
     )
 
 AUTH_USER_MODEL = "lms.User"
+AUTHENTICATION_BACKENDS = [
+    "lms.auth.PhoneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+LOGIN_REDIRECT_URL = "/admin/"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
 ]
