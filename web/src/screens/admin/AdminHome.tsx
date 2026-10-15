@@ -45,6 +45,25 @@ export default function AdminHome() {
         <Stat value={d.counts.parents} label="Parents" href="#/people/parent" />
         <Stat value={d.counts.classes} label="Classes" href="#/classes" />
       </div>
+
+      <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-3.5 my-3 flex items-center justify-between gap-3 shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[22px]">monitoring</span>
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-label-lg text-[14px] font-bold text-primary truncate">Principal Analytics Dashboard</h3>
+            <p className="font-body-sm text-[12px] text-on-surface-variant truncate">Clearance rates, catch-up velocity & compliance breakdown</p>
+          </div>
+        </div>
+        <a
+          href="#/analytics"
+          className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-[12px] font-bold flex items-center gap-1 shrink-0 shadow-sm hover:bg-primary-container active:scale-[0.98] transition-all no-underline"
+        >
+          <span>View</span>
+          <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+        </a>
+      </div>
       <h2 className="text-[15px] my-[22px] mb-2 text-on-surface-variant uppercase tracking-wide font-bold">Subject requests {d.requests.length > 0 && <Badge tone="warn">{d.requests.length} waiting</Badge>}</h2>
       {d.requests.length ? d.requests.map((r) => (
         <div key={r.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-2.5 my-2.5">

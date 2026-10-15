@@ -177,3 +177,29 @@ def test_lesson_without_urdu_has_no_tracks(book):
     assert obj["tracks"] == {} and obj["review_ur"] is None
     with pytest.raises(ValueError):
         pipeline.set_review(b, "t1", "approved", "Teacher", track="ur")
+
+
+def test_all_fbise_book_configs_loadable():
+    for book_id in ["phy11", "chem11", "bio11", "math11", "cs11"]:
+        b = pipeline.load_book(book_id)
+        assert b["id"] == book_id
+        assert len(b["units"]) >= 10
+        assert b["grade"] == "Grade 11"
+        assert b["board"] == "FBISE"
+
+
+def test_pipeline_tracker_execution(capsys):
+    import argparse
+    from factory import cmd_tracker
+
+    args = argparse.Namespace(book=None, json=False)
+    ret = cmd_tracker(args)
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "FBISE Class 11 Production Syllabus & Content Pipeline Tracker" in captured.out
+    assert "phy11" in captured.out
+    assert "chem11" in captured.out
+    assert "bio11" in captured.out
+    assert "math11" in captured.out
+    assert "cs11" in captured.out
+

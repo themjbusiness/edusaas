@@ -67,6 +67,28 @@ export function TeacherMyClasses() {
 
         <AlertsCard teacher />
 
+        {/* At-Risk Intervention Quick-Link Card */}
+        <section className="bg-surface-container-lowest border border-amber-500/30 rounded-xl p-4 shadow-sm flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[22px]">warning</span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <h3 className="font-bold text-[15px] text-on-surface truncate">At-Risk Catch-Up & Intervention</h3>
+              <p className="text-[12px] text-on-surface-variant truncate">
+                Flag chronic absences & locked quiz attempts for parent alerts or override.
+              </p>
+            </div>
+          </div>
+          <a
+            href="#/atRisk"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-[13px] font-bold shadow-sm shrink-0 no-underline hover:opacity-95"
+          >
+            <span>Review</span>
+            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
+        </section>
+
         {/* My Classes Section */}
         <section className="flex flex-col space-y-3">
           <div className="flex items-center justify-between px-1">

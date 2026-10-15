@@ -1,0 +1,60 @@
+{
+  "total_units": 60,
+  "total_lessons": 65,
+  "total_built": 3,
+  "total_approved": 0,
+  "total_questions": 26,
+  "coverage_pct": 4.6,
+  "books": [
+    {
+      "book": "bio11",
+      "subject": "Biology",
+      "units": 12,
+      "lessons": 13,
+      "built": 0,
+      "approved": 0,
+      "questions": 0,
+      "coverage": 0.0
+    },
+    {
+      "book": "chem11",
+      "subject": "Chemistry",
+      "units": 12,
+      "lessons": 13,
+      "built": 0,
+      "approved": 0,
+      "questions": 0,
+      "coverage": 0.0
+    },
+    {
+      "book": "cs11",
+      "subject": "Computer Science",
+      "units": 10,
+      "lessons": 10,
+      "built": 0,
+      "approved": 0,
+      "questions": 0,
+      "coverage": 0.0
+    },
+    {
+      "book": "math11",
+      "subject": "Mathematics",
+      "units": 12,
+      "lessons": 13,
+      "built": 0,
+      "approved": 0,
+      "questions": 0,
+      "coverage": 0.0
+    },
+    {
+      "book": "phy11",
+      "subject": "Physics",
+      "units": 14,
+      "lessons": 16,
+      "built": 3,
+      "approved": 0,
+      "questions": 26,
+      "coverage": 18.8
+    }
+  ]
+}

@@ -48,12 +48,15 @@ function Roster({ d, aid, reload, setData }: { d: ClassData; aid: string; reload
   const [topic, setTopic] = useState(d.topic || d.lessons[0].id);
   const [saving, setSaving] = useState(false);
   const [override, setOverride] = useState<Clearance | null>(null);
+  const [overrideReason, setOverrideReason] = useState('Oral viva conducted & demonstrated 80%+ mastery');
+  const [overrideNotes, setOverrideNotes] = useState('');
+  const [overriding, setOverriding] = useState(false);
   
   const saved = JSON.stringify([d.topic || d.lessons[0].id, initial]);
   const dirty = !d.submitted || JSON.stringify([topic, marks]) !== saved;
   const absentCount = Object.values(marks).filter((v) => v === 'absent').length;
-  const pending = d.clearances.filter((c) => c.status === 'pending');
-  const clear = [...d.clearances].sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1));
+  const pending = d.clearances.filter((c) => c.status === 'pending' || c.status === 'locked');
+  const clear = [...d.clearances].sort((a, b) => ((a.status === 'pending' || a.status === 'locked') ? 0 : 1) - ((b.status === 'pending' || b.status === 'locked') ? 0 : 1));
   const todayWa = d.clearances.filter((c) => c.whatsapp);
   const todoWa = todayWa.filter((c) => !c.whatsapp!.notifiedAt);
 
@@ -174,38 +177,57 @@ function Roster({ d, aid, reload, setData }: { d: ClassData; aid: string; reload
           
           <div className={`bg-surface-container-lowest rounded-xl shadow-sm flex flex-col gap-2 p-2 ${clear.length ? '' : 'justify-center items-center p-6'}`}>
             {clear.length ? clear.map(c => {
-              const ok = c.status === 'cleared';
+              const ok = c.status === 'cleared' || c.status === 'override';
+              const isLocked = c.status === 'locked';
               return (
-                <div key={c.id} className={`p-3 rounded-lg flex ${ok ? 'items-center justify-between flex-row' : 'flex-col'} gap-2 ${ok ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}`}>
+                <div key={c.id} className={`p-3 rounded-lg flex ${ok ? 'items-center justify-between flex-row' : 'flex-col'} gap-2 ${ok ? 'bg-surface-container-lowest' : (isLocked ? 'bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30' : 'bg-surface-container-low')}`}>
                   <div className="flex items-start justify-between gap-2 w-full">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-label-md text-[14px] font-bold shrink-0 ${ok ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-error text-on-error'}`}>
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-label-md text-[14px] font-bold shrink-0 ${ok ? 'bg-secondary-fixed text-on-secondary-fixed' : (isLocked ? 'bg-rose-600 text-white' : 'bg-error text-on-error')}`}>
                         {initials(c.student)}
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-label-lg text-[14px] font-bold text-primary truncate">{c.student}</h3>
-                        <p className={`font-body-sm text-[12px] ${ok ? 'text-on-surface-variant' : 'text-error font-medium'} truncate`}>{c.lesson.topic} {c.lesson.title}</p>
-                        {ok && <p className="font-label-sm text-[11px] text-secondary font-medium mt-0.5">{c.clearedBy === 'teacher' ? 'Cleared by teacher' : `Passed ${c.best}/5`}</p>}
+                        <p className={`font-body-sm text-[12px] ${ok ? 'text-on-surface-variant' : (isLocked ? 'text-rose-700 dark:text-rose-400 font-semibold' : 'text-error font-medium')} truncate`}>{c.lesson.topic} {c.lesson.title}</p>
+                        {ok && (
+                          <p className="font-label-sm text-[11px] text-secondary font-medium mt-0.5">
+                            {c.status === 'override' || c.clearedBy === 'teacher' ? (c.overrideReason ? `Override: ${c.overrideReason}` : 'Cleared by teacher') : `Passed ${c.best}/5`}
+                          </p>
+                        )}
                       </div>
                     </div>
                     {ok ? (
                       <span className="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-label-sm text-[11px] font-semibold shrink-0 flex items-center gap-0.5">
-                        <span className="material-symbols-outlined text-[13px]">check</span> Cleared
+                        <span className="material-symbols-outlined text-[13px]">{c.status === 'override' ? 'verified' : 'check'}</span> {c.status === 'override' ? 'Overridden' : 'Cleared'}
+                      </span>
+                    ) : isLocked ? (
+                      <span className="bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300 dark:border-rose-800 px-2.5 py-0.5 rounded-full font-label-sm text-[11px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[13px]">lock</span> Locked (3 fails)
                       </span>
                     ) : (
-                      <span className="bg-error-container text-on-error-container px-2 py-0.5 rounded-full font-label-sm text-[11px] font-semibold shrink-0">
-                        Pending
+                      <span className="bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 px-2 py-0.5 rounded-full font-label-sm text-[11px] font-semibold shrink-0">
+                        Pending ({c.attempts || 0}/3)
                       </span>
                     )}
                   </div>
                   {!ok && (
                     <div className="bg-surface rounded-md p-2 flex items-center justify-between text-on-surface-variant mt-1">
                       <div className="flex items-center gap-1.5 text-on-surface-variant">
-                        <span className="material-symbols-outlined text-[15px]">history</span>
-                        <span className="font-body-sm text-[11px]">{c.lastAttempt ? `Last attempt ${when(c.lastAttempt)} · Best: ${c.best}/5` : 'Not started yet'}</span>
+                        <span className="material-symbols-outlined text-[15px]">{isLocked ? 'lock' : 'history'}</span>
+                        <span className="font-body-sm text-[11px]">
+                          {c.lastAttempt ? `Last attempt ${when(c.lastAttempt)} · Best: ${c.best}/5 · Attempts: ${c.attempts || 0}/3` : 'Not started yet'}
+                        </span>
                       </div>
-                      <button onClick={() => setOverride(c)} className="font-label-md text-[13px] text-secondary font-bold hover:underline ml-2 shrink-0">
-                        Clear manually…
+                      <button
+                        onClick={() => {
+                          setOverride(c);
+                          setOverrideReason(isLocked ? 'Oral viva conducted & demonstrated 80%+ mastery' : 'Medical certificate provided');
+                          setOverrideNotes('');
+                        }}
+                        className={`font-label-md text-[13px] font-bold hover:underline ml-2 shrink-0 flex items-center gap-1 ${isLocked ? 'text-rose-700 dark:text-rose-400 font-bold' : 'text-secondary'}`}
+                      >
+                        <span className="material-symbols-outlined text-[15px]">{isLocked ? 'verified_user' : 'edit'}</span>
+                        <span>{isLocked ? 'Review & Override' : 'Clear manually…'}</span>
                       </button>
                     </div>
                   )}
@@ -302,33 +324,70 @@ function Roster({ d, aid, reload, setData }: { d: ClassData; aid: string; reload
 
       {override && (
         <div className="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest rounded-2xl p-space-md w-full max-w-sm shadow-xl flex flex-col gap-3">
+          <div className="bg-surface-container-lowest rounded-2xl p-space-md w-full max-w-md shadow-xl flex flex-col gap-3">
             <div className="flex items-center gap-2 text-primary">
               <span className="material-symbols-outlined text-secondary text-[24px]">verified</span>
-              <h3 className="font-headline-sm text-[18px] font-bold">Manual Clearance</h3>
+              <h3 className="font-headline-sm text-[18px] font-bold">Manual Clearance Override</h3>
             </div>
             <p className="font-body-md text-[14px] text-on-surface-variant">
-              Manually clear <b>{override.student}</b> for {override.lesson.topic} {override.lesson.title}.
+              Manually grant clearance to <b>{override.student}</b> for {override.lesson.topic} {override.lesson.title}.
+              {override.status === 'locked' && (
+                <span className="block text-rose-700 dark:text-rose-400 font-bold text-[12px] mt-1">
+                  Student completed 3 failed attempts (best: {override.best}/5). An authorized reason is required for clearance.
+                </span>
+              )}
             </p>
-            <div className="bg-surface-container-low p-3 rounded-xl flex flex-col gap-1">
-              <span className="font-label-sm text-[12px] font-bold text-on-surface-variant">Authorized Reason</span>
-              <select className="w-full bg-surface-container-lowest font-body-sm text-[14px] p-2 rounded-lg text-on-surface focus:outline-none border border-outline-variant"
-                onChange={(e) => {
-                  post(`teacher/clearances/${override.id}/override`, { reason: e.target.value }).then(() => {
-                    toast(override.student + ' cleared. Parent notified.');
-                    setOverride(null); reload();
-                  }).catch(err => toast(err.message));
-                }}
+            <div className="bg-surface-container-low p-3.5 rounded-xl flex flex-col gap-2.5">
+              <label className="font-label-sm text-[12px] font-bold text-on-surface-variant">Authorized Reason</label>
+              <select
+                className="w-full bg-surface-container-lowest font-body-sm text-[14px] p-2.5 rounded-lg text-on-surface focus:outline-none border border-outline-variant"
+                value={overrideReason}
+                onChange={(e) => setOverrideReason(e.target.value)}
               >
-                <option value="">Select a reason to clear...</option>
+                <option value="Oral viva conducted & demonstrated 80%+ mastery">Oral viva conducted & demonstrated 80%+ mastery</option>
                 <option value="Medical certificate provided">Medical certificate provided</option>
+                <option value="Attended office hours & completed catch-up">Attended office hours & completed catch-up</option>
                 <option value="On official college duty">On official college duty</option>
                 <option value="Covered the topic with the teacher in person">Covered the topic with the teacher in person</option>
+                <option value="Extenuating circumstances verified">Extenuating circumstances verified</option>
               </select>
+
+              <label className="font-label-sm text-[12px] font-bold text-on-surface-variant mt-1">Teacher Notes (Optional)</label>
+              <textarea
+                rows={2}
+                value={overrideNotes}
+                onChange={(e) => setOverrideNotes(e.target.value)}
+                placeholder="Optional notes or details regarding this override..."
+                className="w-full bg-surface-container-lowest font-body-sm text-[13px] p-2.5 rounded-lg text-on-surface focus:outline-none border border-outline-variant resize-none"
+              />
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <button onClick={() => setOverride(null)} className="flex-1 min-h-[44px] rounded-xl bg-surface-container-high text-primary font-label-md text-[14px] font-bold">
+              <button
+                disabled={overriding}
+                onClick={() => setOverride(null)}
+                className="flex-1 min-h-[44px] rounded-xl bg-surface-container-high text-primary font-label-md text-[14px] font-bold hover:bg-surface-variant transition-colors"
+              >
                 Cancel
+              </button>
+              <button
+                disabled={overriding || !overrideReason}
+                onClick={async () => {
+                  setOverriding(true);
+                  try {
+                    const fullReason = overrideNotes.trim() ? `${overrideReason}: ${overrideNotes.trim()}` : overrideReason;
+                    await post(`teacher/clearances/${override.id}/override`, { reason: fullReason });
+                    toast(`${override.student} cleared. Parent notified.`);
+                    setOverride(null);
+                    reload();
+                  } catch (err) {
+                    toast((err as Error).message);
+                  } finally {
+                    setOverriding(false);
+                  }
+                }}
+                className="flex-1 min-h-[44px] rounded-xl bg-primary text-on-primary font-label-md text-[14px] font-bold shadow-md hover:bg-primary-container active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {overriding ? 'Granting…' : 'Grant Clearance'}
               </button>
             </div>
           </div>

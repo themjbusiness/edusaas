@@ -30,7 +30,9 @@ def visible_lessons(qs=None):
     qs = Lesson.objects.all() if qs is None else qs
     qs = qs.filter(is_published=True)
     if not settings.SHOW_DRAFT_LESSONS:
-        qs = qs.filter(review_status="approved")
+        qs = qs.filter(review_status=Lesson.APPROVED)
+    else:
+        qs = qs.exclude(review_status__in=[Lesson.IN_REVIEW, Lesson.REJECTED])
     return qs
 
 
@@ -244,7 +246,7 @@ def student_clearances(user):
     week_ago = timezone.now() - timedelta(days=7)
     qs = Clearance.objects.filter(student=user).select_related("lesson__subject", "attendance", "student__student")
     return [clearance_dict(c) for c in qs.order_by("-created_at")
-            if c.status == Clearance.PENDING or (c.cleared_at and c.cleared_at >= week_ago)]
+            if c.status in (Clearance.PENDING, Clearance.LOCKED) or (c.cleared_at and c.cleared_at >= week_ago)]
 
 
 @api(roles=STUDENT)
@@ -260,7 +262,7 @@ def student_home(request):
         subjects.append({"code": s.code, "name": s.name, "grade": s.grade,
                          "status": "live" if mine else "coming_soon", "total": len(mine),
                          "done": sum(1 for l in mine if progress.get(l.id) and progress[l.id].passed),
-                         "pending": sum(1 for c in clearances if c["status"] == Clearance.PENDING
+                         "pending": sum(1 for c in clearances if c["status"] in (Clearance.PENDING, Clearance.LOCKED)
                                         and c["lesson"]["subjectCode"] == s.code)})
     subjects.sort(key=lambda x: (x["status"] != "live", order[x["code"]]))  # subjects with content first
     grade = u.student.school_class.grade
@@ -281,7 +283,7 @@ def student_subject(request, code):
         raise ApiError(404, "not_found", "This subject is not part of your course.")
     lessons = list(student_lessons(u).filter(subject=subject))
     progress = {p.lesson_id: p for p in LessonProgress.objects.filter(student=u, lesson__in=lessons)}
-    missed = set(Clearance.objects.filter(student=u, status=Clearance.PENDING).values_list("lesson_id", flat=True))
+    missed = set(Clearance.objects.filter(student=u, status__in=(Clearance.PENDING, Clearance.LOCKED)).values_list("lesson_id", flat=True))
     units = {x.number: {"number": x.number, "title": x.title, "lessons": []} for x in subject.units.all()}
     for l in lessons:
         units.setdefault(l.unit_number, {"number": l.unit_number, "title": l.unit_title, "lessons": []})
@@ -295,7 +297,7 @@ def student_subject(request, code):
 def lesson_detail(request, lesson_id):
     lesson = student_lesson(request.user, lesson_id)
     prog, _ = LessonProgress.objects.get_or_create(student=request.user, lesson=lesson)
-    pending = Clearance.objects.filter(student=request.user, lesson=lesson, status=Clearance.PENDING).exists()
+    pending = Clearance.objects.filter(student=request.user, lesson=lesson, status__in=(Clearance.PENDING, Clearance.LOCKED)).exists()
     d = lesson_full(lesson, prog)
     d["missed"] = pending
     return d
@@ -339,18 +341,49 @@ def quiz_start(request, lesson_id):
     prog = LessonProgress.objects.filter(student=request.user, lesson=lesson).first()
     if not prog or not prog.unlocked:
         raise ApiError(403, "quiz_locked", "Listen to at least 90% of the lesson to unlock the quiz.")
-    last = QuizAttempt.objects.filter(student=request.user, lesson=lesson, submitted_at__isnull=False) \
-        .order_by("-submitted_at").first()
-    cooldown = settings.QUIZ_RETRY_COOLDOWN
-    if last and not last.passed and (timezone.now() - last.submitted_at).total_seconds() < cooldown:
-        wait = cooldown - int((timezone.now() - last.submitted_at).total_seconds())
-        raise ApiError(429, "cooldown", f"Review the lesson for a moment. You can retry in {wait} seconds.")
+    
+    # Check if clearance is locked due to 3 failed attempts
+    clearance = Clearance.objects.filter(student=request.user, lesson=lesson).first()
+    if clearance and clearance.status == Clearance.LOCKED:
+        raise ApiError(403, "locked", "Maximum attempts reached. Please consult your teacher for assistance.")
+    
+    past_attempts = QuizAttempt.objects.filter(student=request.user, lesson=lesson, submitted_at__isnull=False).order_by("-submitted_at")
+    attempt_count = past_attempts.count()
+    if attempt_count >= 3 and not (prog and prog.passed):
+        raise ApiError(403, "max_attempts", "Maximum attempts reached. Please consult your teacher.")
+    
+    last = past_attempts.first()
+    now = timezone.now()
+    if last and not last.passed:
+        cooldown = getattr(settings, "QUIZ_RETRY_COOLDOWN", 600)
+        cooldown_until = last.cooldown_until or (last.submitted_at + timedelta(seconds=cooldown))
+        if now < cooldown_until:
+            wait = int((cooldown_until - now).total_seconds())
+            raise ApiError(429, "cooldown", f"Review the lesson for a moment. You can retry in {wait} seconds.")
+    
     pool = lesson.quiz
-    picked = random.sample(range(len(pool)), min(settings.QUIZ_SIZE, len(pool)))
+    seen_q_indices = set()
+    if last and last.questions:
+        seen_q_indices = {x["q"] for x in last.questions}
+    unseen_pool = [i for i in range(len(pool)) if i not in seen_q_indices]
+    quiz_size = min(settings.QUIZ_SIZE, len(pool))
+    
+    if len(unseen_pool) >= quiz_size:
+        picked = random.sample(unseen_pool, quiz_size)
+    else:
+        remaining = [i for i in range(len(pool)) if i not in unseen_pool]
+        picked = unseen_pool + random.sample(remaining, quiz_size - len(unseen_pool))
+    
     questions = [{"q": i, "order": random.sample(range(len(pool[i]["options"])), len(pool[i]["options"]))}
                  for i in picked]
-    attempt = QuizAttempt.objects.create(student=request.user, lesson=lesson, questions=questions)
-    return {"attempt": str(attempt.id), "passMark": settings.PASS_MARK, "size": len(questions),
+    attempt = QuizAttempt.objects.create(
+        student=request.user,
+        lesson=lesson,
+        questions=questions,
+        attempt_number=attempt_count + 1
+    )
+    return {"attempt": str(attempt.id), "attemptNumber": attempt.attempt_number, "maxAttempts": 3,
+            "passMark": settings.PASS_MARK, "size": len(questions),
             "lesson": {"id": lesson.id, "topic": lesson.topic, "title": lesson.title, "subject": lesson.subject.name},
             # No answers and no explanations are sent until the attempt is submitted.
             "questions": [{"question": pool[x["q"]]["question"],
@@ -367,7 +400,10 @@ def _quiz_submit(user, attempt_id, answers):
             raise ApiError(409, "already_submitted", "This quiz was already submitted.")
         if not isinstance(answers, list) or len(answers) != len(attempt.questions):
             raise ApiError(400, "bad_request", "Answer every question.")
+        
         lesson, pool, review, score = attempt.lesson, attempt.lesson.quiz, [], 0
+        missed_sections = []
+        sections = lesson.sections or []
         for x, chosen in zip(attempt.questions, answers):
             item = pool[x["q"]]
             correct_shown = x["order"].index(item["answer"])
@@ -375,9 +411,28 @@ def _quiz_submit(user, attempt_id, answers):
             score += ok
             review.append({"question": item["question"], "options": [item["options"][k] for k in x["order"]],
                            "chosen": chosen, "correct": correct_shown, "ok": ok, "explanation": item["explanation"]})
+            if not ok:
+                s_idx = item.get("section")
+                if s_idx is None or s_idx >= len(sections):
+                    s_idx = x["q"] % len(sections) if sections else 0
+                if sections:
+                    sec = sections[s_idx]
+                    sec_info = {
+                        "sectionIndex": s_idx,
+                        "page": sec.get("page", 0),
+                        "text": sec.get("text", "")[:120] + "...",
+                        "start": sec.get("start", 0),
+                    }
+                    if sec_info not in missed_sections:
+                        missed_sections.append(sec_info)
+        
         passed = score >= settings.PASS_MARK
         now = timezone.now()
         attempt.answers, attempt.score, attempt.passed, attempt.submitted_at = answers, score, passed, now
+        attempt.missed_sections = missed_sections
+        if not passed:
+            cooldown_secs = getattr(settings, "QUIZ_RETRY_COOLDOWN", 600)
+            attempt.cooldown_until = now + timedelta(seconds=cooldown_secs)
         attempt.save()
 
         prog = LessonProgress.objects.select_for_update().get(student=user, lesson=lesson)
@@ -387,7 +442,7 @@ def _quiz_submit(user, attempt_id, answers):
 
         cleared_now = False
         pending = list(Clearance.objects.select_for_update().filter(student=user, lesson=lesson,
-                                                                    status=Clearance.PENDING))
+                                                                    status__in=[Clearance.PENDING, Clearance.LOCKED]))
         for c in pending:
             c.attempts += 1
             c.best_score = max(c.best_score or 0, score)
@@ -395,22 +450,65 @@ def _quiz_submit(user, attempt_id, answers):
             if passed:
                 c.status, c.cleared_by, c.cleared_at = Clearance.CLEARED, "quiz", now
                 cleared_now = True
+            elif c.attempts >= 3:
+                c.status = Clearance.LOCKED
             c.save()
+
     if cleared_now:
         profile = user.student
         teachers = [a.teacher for a in TeachingAssignment.objects.filter(
             school_class=profile.school_class, subject=lesson.subject).select_related("teacher")]
         notify.clearance_granted(user, profile.parent, teachers, lesson, score)
+    
     attempts = pending[0].attempts if pending else QuizAttempt.objects.filter(
         student=user, lesson=lesson, submitted_at__isnull=False).count()
+    is_locked = any(c.status == Clearance.LOCKED for c in pending) or (attempts >= 3 and not passed)
+    cooldown_left = int((attempt.cooldown_until - now).total_seconds()) if attempt.cooldown_until and not passed else 0
+
     return {"score": score, "size": len(review), "passMark": settings.PASS_MARK, "passed": passed,
-            "cleared": cleared_now, "attempts": attempts, "review": review,
-            "retryAfter": 0 if passed else settings.QUIZ_RETRY_COOLDOWN}
+            "cleared": cleared_now, "attempts": attempts, "attemptNumber": attempt.attempt_number,
+            "maxAttempts": 3, "locked": is_locked, "review": review, "missedSections": missed_sections,
+            "retryAfter": 0 if passed else cooldown_left,
+            "cooldownUntil": iso(attempt.cooldown_until)}
+
 
 @api(methods=("POST",), roles=STUDENT)
 def quiz_submit(request, attempt_id):
     answers = request.json.get("answers")
     return _quiz_submit(request.user, attempt_id, answers)
+
+
+@api(roles=STUDENT)
+def lesson_remediation(request, lesson_id):
+    """Returns missed sections, remaining cooldown, and attempt stats for mastery remediation (F9)."""
+    lesson = student_lesson(request.user, lesson_id)
+    prog = LessonProgress.objects.filter(student=request.user, lesson=lesson).first()
+    clearance = Clearance.objects.filter(student=request.user, lesson=lesson).first()
+    
+    attempts_qs = QuizAttempt.objects.filter(student=request.user, lesson=lesson, submitted_at__isnull=False).order_by("-submitted_at")
+    attempt_count = attempts_qs.count()
+    last_attempt = attempts_qs.first()
+    
+    now = timezone.now()
+    cooldown_left = 0
+    if last_attempt and not last_attempt.passed and last_attempt.cooldown_until:
+        if now < last_attempt.cooldown_until:
+            cooldown_left = int((last_attempt.cooldown_until - now).total_seconds())
+            
+    is_locked = (clearance.status == Clearance.LOCKED) if clearance else (attempt_count >= 3 and not (prog and prog.passed))
+    
+    return {
+        "lesson": {"id": lesson.id, "title": lesson.title, "topic": lesson.topic, "subject": lesson.subject.name},
+        "attemptCount": attempt_count,
+        "maxAttempts": 3,
+        "locked": is_locked,
+        "passed": bool(prog and prog.passed),
+        "lastScore": last_attempt.score if last_attempt else None,
+        "bestScore": prog.best_score if prog else None,
+        "cooldownSecondsLeft": cooldown_left,
+        "cooldownUntil": iso(last_attempt.cooldown_until) if last_attempt else None,
+        "missedSections": last_attempt.missed_sections if last_attempt else [],
+    }
 
 
 @api(methods=("POST",), roles=STUDENT)
@@ -470,7 +568,7 @@ def class_clearances(school_class):
         .select_related("lesson__subject", "attendance__subject", "attendance__school_class", "student__student__parent") \
         .order_by("status", "-created_at")
     return [dict(clearance_dict(c), whatsapp=whatsapp_link(c)) for c in qs
-            if c.status == Clearance.PENDING or (c.cleared_at and c.cleared_at >= week_ago)]
+            if c.status in (Clearance.PENDING, Clearance.LOCKED) or (c.cleared_at and c.cleared_at >= week_ago)]
 
 
 @api(roles=TEACHER)
@@ -600,11 +698,15 @@ def teacher_override(request, clearance_id):
     reason = (request.json.get("reason") or "").strip()
     if len(reason) < 3:
         raise ApiError(400, "reason_required", "Give a reason, for example 'Medical certificate provided'.")
-    if c.status == Clearance.CLEARED:
+    if c.status in (Clearance.CLEARED, Clearance.OVERRIDE):
         raise ApiError(409, "already_cleared", "This student is already cleared.")
-    c.status, c.cleared_by, c.cleared_at = Clearance.CLEARED, "teacher", timezone.now()
+    c.status, c.cleared_by, c.cleared_at = Clearance.OVERRIDE, "teacher", timezone.now()
     c.override_by, c.override_reason = request.user, reason[:200]
     c.save()
+    LessonProgress.objects.update_or_create(
+        student=c.student, lesson=c.lesson,
+        defaults={"unlocked": True, "passed": True}
+    )
     notify.clearance_override(c.student, c.student.student.parent, c.lesson)
     return clearance_dict(c)
 
@@ -680,7 +782,7 @@ def child_progress(student):
     att = Attendance.objects.filter(student=student, date__gte=today - timedelta(days=30))
     total = att.count()
     present = att.filter(status__in=(Attendance.PRESENT, Attendance.LATE)).count()
-    cleared = Clearance.objects.filter(student=student, status=Clearance.CLEARED,
+    cleared = Clearance.objects.filter(student=student, status__in=(Clearance.CLEARED, Clearance.OVERRIDE),
                                        cleared_at__gte=timezone.now() - timedelta(days=90)).select_related("attendance")
     days = [(timezone.localtime(c.cleared_at).date() - c.attendance.date).days for c in cleared]
     median = statistics.median(days) if days else None
@@ -727,8 +829,8 @@ def parent_child_subject(request, student_id, code):
     lessons = list(student_lessons(child).filter(subject=subject))
     progress = {p.lesson_id: p for p in LessonProgress.objects.filter(student=child, lesson__in=lessons)}
     clr = Clearance.objects.filter(student=child, lesson__in=lessons)
-    missed = set(clr.filter(status=Clearance.PENDING).values_list("lesson_id", flat=True))
-    cleared = set(clr.filter(status=Clearance.CLEARED).values_list("lesson_id", flat=True))
+    missed = set(clr.filter(status__in=(Clearance.PENDING, Clearance.LOCKED)).values_list("lesson_id", flat=True))
+    cleared = set(clr.filter(status__in=(Clearance.CLEARED, Clearance.OVERRIDE)).values_list("lesson_id", flat=True))
     units = {x.number: {"number": x.number, "title": x.title, "topics": []} for x in subject.units.all()}
     for l in lessons:
         prog = progress.get(l.id)

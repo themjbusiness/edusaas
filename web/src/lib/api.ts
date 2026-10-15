@@ -38,6 +38,7 @@ export async function call<T>(method: string, path: string, body?: unknown, opts
 }
 export const get = <T>(p: string) => call<T>('GET', p);
 export const post = <T>(p: string, b: unknown = {}, o?: { keepalive?: boolean }) => call<T>('POST', p, b, o);
+export const put = <T>(p: string, b: unknown = {}) => call<T>('PUT', p, b);
 export const del = <T>(p: string) => call<T>('DELETE', p);
 
 /** Media paths come back relative ("media/phy11/…"); the app lives under /app/, so make them absolute. */
@@ -65,7 +66,7 @@ export interface LessonFull extends LessonSummary {
 export interface ClearanceLesson { id: string; topic: string; title: string; subject: string; subjectCode: string }
 export interface Clearance {
   id: number; student: string; studentId: string; roll: string; lesson: ClearanceLesson; date: string;
-  status: 'pending' | 'cleared'; clearedBy: string; attempts: number; best: number | null; lastAttempt: string | null;
+  status: 'pending' | 'cleared' | 'override' | 'locked'; clearedBy: string; attempts: number; best: number | null; lastAttempt: string | null;
   clearedAt: string | null; overrideReason: string;
   whatsapp?: { phone: string; parent: string; text: string; notifiedAt: string | null } | null;
 }
@@ -77,14 +78,76 @@ export interface StudentHome {
 export interface UnitRow { number: number; title: string; status: 'live' | 'coming_soon'; lessons: LessonSummary[] }
 export interface SubjectDetail { subject: { code: string; name: string; grade: string; status: string }; units: UnitRow[] }
 export interface QuizStart {
-  attempt: string; passMark: number; size: number; lesson: { id: string; topic: string; title: string; subject: string };
+  attempt: string; attemptNumber?: number; maxAttempts?: number; passMark: number; size: number; lesson: { id: string; topic: string; title: string; subject: string };
   questions: { question: string; options: string[] }[];
 }
+export interface MissedSection {
+  sectionIndex: number;
+  page: number;
+  text: string;
+  start: number;
+}
 export interface QuizResult {
-  score: number; size: number; passMark: number; passed: boolean; cleared: boolean; attempts: number; retryAfter: number;
+  score: number; size: number; passMark: number; passed: boolean; cleared: boolean; attempts: number;
+  attemptNumber?: number; maxAttempts?: number; locked?: boolean; retryAfter: number; cooldownUntil?: string | null;
+  missedSections?: MissedSection[];
   review: { question: string; options: string[]; chosen: number | null; correct: number; ok: boolean; explanation: string }[];
+}
+export interface RemediationInfo {
+  lesson: { id: string; title: string; topic: string; subject: string };
+  attemptCount: number;
+  maxAttempts: number;
+  locked: boolean;
+  passed: boolean;
+  lastScore: number | null;
+  bestScore: number | null;
+  cooldownSecondsLeft: number;
+  cooldownUntil: string | null;
+  missedSections: MissedSection[];
 }
 export interface Message {
   id: number; to: string; toRole: string; phone: string; channel: string; type: string; body: string; status: string;
   error: string; at: string; student: string; manual: boolean; pushed: { ok: number; total: number } | null;
 }
+
+export interface DailyTrendPoint {
+  date: string;
+  absences: number;
+  clearances: number;
+}
+
+export interface PrincipalOverview {
+  totalAbsences: number;
+  clearedCount: number;
+  clearanceRate: number;
+  medianHoursToClear: number | null;
+  atRiskCount: number;
+  dailyTrend: DailyTrendPoint[];
+  days: number;
+  college: string;
+}
+
+export interface ClassBreakdownRow {
+  id: string;
+  name: string;
+  grade: string;
+  stream: string;
+  section: string;
+  teacherName: string;
+  studentCount: number;
+  absences: number;
+  clearances: number;
+  rate: number | null;
+  medianHours: number | null;
+}
+
+export interface TeacherBreakdownRow {
+  id: string;
+  name: string;
+  subject: string;
+  absences: number;
+  clearances: number;
+  rate: number | null;
+  medianHours: number | null;
+}
+

@@ -1,0 +1,110 @@
+{
+  "id": "math11",
+  "pdf": "../../books/math11.pdf",
+  "pdf_page_offset": 0,
+  "subject": "Mathematics",
+  "grade": "Grade 11",
+  "board": "FBISE",
+  "publisher": "National Book Foundation (Federal Textbook Board)",
+  "voice": "en-IN-PrabhatNeural",
+  "rate": "+0%",
+  "units": [
+    {
+      "id": "u1",
+      "number": 1,
+      "title": "Complex Numbers",
+      "lessons": [
+        { "id": "math11-u1-operations", "topic": "1.1", "title": "Algebraic Operations and Argand Diagram", "pages": [1, 2, 3] },
+        { "id": "math11-u1-modulus-argument", "topic": "1.2", "title": "Polar Form, Modulus and Argument of Complex Numbers", "pages": [4, 5, 6] }
+      ]
+    },
+    {
+      "id": "u2",
+      "number": 2,
+      "title": "Matrices and Determinants",
+      "lessons": [
+        { "id": "math11-u2-cramers-rule", "topic": "2.1", "title": "Determinants, Inverses and Cramer's Rule", "pages": [25, 26, 27] }
+      ]
+    },
+    {
+      "id": "u3",
+      "number": 3,
+      "title": "Vectors",
+      "lessons": [
+        { "id": "math11-u3-dot-cross", "topic": "3.1", "title": "Scalar and Vector Products in 3D Space", "pages": [50, 51, 52] }
+      ]
+    },
+    {
+      "id": "u4",
+      "number": 4,
+      "title": "Sequences and Series",
+      "lessons": [
+        { "id": "math11-u4-ap-gp", "topic": "4.1", "title": "Arithmetic and Geometric Progressions", "pages": [75, 76, 77] }
+      ]
+    },
+    {
+      "id": "u5",
+      "number": 5,
+      "title": "Miscellaneous Series",
+      "lessons": [
+        { "id": "math11-u5-sigma-notation", "topic": "5.1", "title": "Sigma Notation and Sum of Natural Numbers", "pages": [100, 101, 102] }
+      ]
+    },
+    {
+      "id": "u6",
+      "number": 6,
+      "title": "Permutation, Combination and Probability",
+      "lessons": [
+        { "id": "math11-u6-counting-principles", "topic": "6.1", "title": "Permutations, Combinations and Basic Probability", "pages": [125, 126, 127] }
+      ]
+    },
+    {
+      "id": "u7",
+      "number": 7,
+      "title": "Mathematical Induction and Binomial Theorem",
+      "lessons": [
+        { "id": "math11-u7-induction-binomial", "topic": "7.1", "title": "Principle of Induction and General Term of Binomial Expansion", "pages": [150, 151, 152] }
+      ]
+    },
+    {
+      "id": "u8",
+      "number": 8,
+      "title": "Fundamentals of Trigonometry",
+      "lessons": [
+        { "id": "math11-u8-radian-measure", "topic": "8.1", "title": "Arc Length, Radian Measure and Trigonometric Ratios", "pages": [175, 176, 177] }
+      ]
+    },
+    {
+      "id": "u9",
+      "number": 9,
+      "title": "Trigonometric Identities",
+      "lessons": [
+        { "id": "math11-u9-sum-difference", "topic": "9.1", "title": "Fundamental Law of Trigonometry and Double Angle Formulas", "pages": [200, 201, 202] }
+      ]
+    },
+    {
+      "id": "u10",
+      "number": 10,
+      "title": "Trigonometric Functions and Graphs",
+      "lessons": [
+        { "id": "math11-u10-periodicity-graphs", "topic": "10.1", "title": "Periodicity, Domain, Range and Graphs of Sine and Cosine", "pages": [225, 226, 227] }
+      ]
+    },
+    {
+      "id": "u11",
+      "number": 11,
+      "title": "Solutions of Triangles",
+      "lessons": [
+        { "id": "math11-u11-sine-cosine-laws", "topic": "11.1", "title": "Law of Sines, Law of Cosines and Half Angle Formulas", "pages": [250, 251, 252] }
+      ]
+    },
+    {
+      "id": "u12",
+      "number": 12,
+      "title": "Inverse Trigonometric Functions",
+      "lessons": [
+        { "id": "math11-u12-inverse-trig", "topic": "12.1", "title": "Principal Value Branches and Trigonometric Equations", "pages": [275, 276, 277] }
+      ]
+    }
+  ]
+}

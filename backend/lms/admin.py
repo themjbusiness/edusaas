@@ -65,7 +65,8 @@ class StudentProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ["topic", "title", "subject", "duration_sec", "review_status", "is_published"]
+    list_display = ["topic", "title", "subject", "duration_sec", "review_status", "reviewed_by", "reviewed_at", "is_published"]
+    list_filter = ["review_status", "subject", "is_published"]
     list_editable = ["is_published"]
     exclude = ["quiz", "sections"]
 

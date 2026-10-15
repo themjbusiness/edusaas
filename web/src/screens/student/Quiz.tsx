@@ -122,7 +122,19 @@ export default function Quiz({ args }: { args: string[] }) {
 
 function Result({ r, id }: { r: QuizResult; id: string }) {
   const percent = Math.round((r.score / r.size) * 100);
-  
+  const [countdown, setCountdown] = useState(r.retryAfter || 0);
+  const isLocked = Boolean(r.locked || (r.attempts >= 3 && !r.passed));
+  const attemptNum = r.attemptNumber || r.attempts || 1;
+  const maxAttempts = r.maxAttempts || 3;
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown((c) => Math.max(0, c - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
+
   if (r.passed) {
     return (
       <main className="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen">
@@ -183,50 +195,145 @@ function Result({ r, id }: { r: QuizResult; id: string }) {
     <main className="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen">
       <div className="flex flex-col w-full px-margin-mobile pb-12">
         
-        <div className="w-full bg-surface-container-lowest rounded-xl shadow-sm p-6 flex flex-col items-center text-center relative overflow-hidden mt-4 border border-outline-variant/30">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600"></div>
-          
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 font-label-sm text-[12px] font-bold mb-6">
-            <span className="material-symbols-outlined text-amber-700 text-[16px]">info</span>
-            <span>Passing Threshold: {r.passMark}/{r.size}</span>
+        {isLocked ? (
+          <div className="w-full bg-surface-container-lowest rounded-xl shadow-sm p-6 flex flex-col items-center text-center relative overflow-hidden mt-4 border border-rose-300 dark:border-rose-900/50">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700"></div>
+            
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-900 font-label-sm text-[12px] font-bold mb-6">
+              <span className="material-symbols-outlined text-rose-700 text-[16px]">lock</span>
+              <span>Attempt {attemptNum} of {maxAttempts} · Escalated</span>
+            </div>
+            
+            <div className="relative w-20 h-20 rounded-full bg-rose-100 flex items-center justify-center mb-4 shadow-inner">
+              <span className="material-symbols-outlined text-rose-700 text-[42px]">lock_person</span>
+            </div>
+            
+            <div className="flex items-baseline justify-center gap-1 mb-2">
+              <span className="font-headline-lg-mobile text-[36px] text-on-surface font-bold tracking-tight">{r.score}</span>
+              <span className="text-on-surface-variant font-headline-sm text-[20px] font-bold">/ {r.size}</span>
+            </div>
+            
+            <h2 className="font-headline-md text-[24px] text-on-surface font-bold mt-1">Teacher Review Required</h2>
+            
+            <p className="font-body-md text-[14px] text-on-surface-variant max-w-sm mt-2 leading-relaxed">
+              You have completed 3 quiz attempts without reaching the 80% passing threshold. To obtain clearance, please consult your subject teacher in college for guidance and manual clearance.
+            </p>
+            
+            <div className="w-full max-w-sm bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 rounded-xl p-3.5 my-4 text-left flex items-start gap-3">
+              <span className="material-symbols-outlined text-rose-600 text-[20px] mt-0.5 shrink-0">info</span>
+              <div className="text-[13px] text-on-surface leading-snug">
+                <p className="font-bold">Next Steps:</p>
+                <p className="text-on-surface-variant mt-0.5">Visit your teacher during college office hours. They can review your missed questions and grant clearance directly.</p>
+              </div>
+            </div>
+            
+            <div className="w-full flex flex-col sm:flex-row gap-3 mt-2">
+              <a href={`#/lesson/${id}`} className="flex-1 h-12 bg-primary hover:bg-primary-container active:scale-[0.98] text-on-primary rounded-xl font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-sm transition-all">
+                <span className="material-symbols-outlined text-[20px]">menu_book</span>
+                <span>Review Lesson</span>
+              </a>
+              <a href="#/home" className="flex-1 h-12 bg-surface-container-low hover:bg-surface-container active:scale-[0.98] text-on-surface font-label-lg text-[15px] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm border border-outline-variant/30">
+                <span className="material-symbols-outlined text-[20px]">home</span>
+                <span>Back to Home</span>
+              </a>
+            </div>
           </div>
-          
-          <div className="relative w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-4 shadow-inner">
-            <span className="material-symbols-outlined text-amber-700 text-[42px] transition-transform duration-500 hover:rotate-180">replay</span>
+        ) : (
+          <div className="w-full bg-surface-container-lowest rounded-xl shadow-sm p-6 flex flex-col items-center text-center relative overflow-hidden mt-4 border border-outline-variant/30">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600"></div>
+            
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 font-label-sm text-[12px] font-bold mb-6">
+              <span className="material-symbols-outlined text-amber-700 text-[16px]">replay</span>
+              <span>Attempt {attemptNum} of {maxAttempts} · Pass Mark {r.passMark}/{r.size}</span>
+            </div>
+            
+            <div className="relative w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-4 shadow-inner">
+              <span className="material-symbols-outlined text-amber-700 text-[42px] transition-transform duration-500 hover:rotate-180">replay</span>
+            </div>
+            
+            <div className="flex items-baseline justify-center gap-1 mb-2">
+              <span className="font-headline-lg-mobile text-[36px] text-on-surface font-bold tracking-tight">{r.score}</span>
+              <span className="text-on-surface-variant font-headline-sm text-[20px] font-bold">/ {r.size}</span>
+            </div>
+            
+            <h2 className="font-headline-md text-[24px] text-on-surface font-bold mt-1">Almost there!</h2>
+            
+            <p className="font-body-md text-[14px] text-on-surface-variant max-w-sm mt-2 leading-relaxed">
+              {countdown > 0 ? (
+                <>Take a moment to review the topics you missed. Next attempt unlocks in <span className="font-bold text-amber-800">{Math.floor(countdown / 60)}m {('0' + (countdown % 60)).slice(-2)}s</span>.</>
+              ) : (
+                <>Cooldown complete! You can now retake the quiz with alternate questions.</>
+              )}
+            </p>
+            
+            <div className="w-full max-w-xs bg-surface-container-high rounded-full h-2 mt-5 mb-2 overflow-hidden flex">
+              <div className="bg-amber-500 h-full rounded-full transition-all duration-300" style={{ width: `${percent}%` }}></div>
+            </div>
+            
+            <div className="w-full max-w-xs flex justify-between font-label-sm text-[11px] font-bold text-on-surface-variant mb-6 uppercase tracking-wider">
+              <span>Score: {percent}%</span>
+              <span className="text-amber-900">Required: {Math.round((r.passMark / r.size) * 100)}%</span>
+            </div>
+            
+            <div className="w-full flex flex-col sm:flex-row gap-3">
+              {countdown > 0 ? (
+                <button disabled className="flex-1 h-12 bg-surface-container-high text-on-surface-variant/60 rounded-xl font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 cursor-not-allowed border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-[20px]">schedule</span>
+                  <span>Wait {Math.floor(countdown / 60)}:{('0' + (countdown % 60)).slice(-2)}</span>
+                </button>
+              ) : (
+                <a href={`#/quiz/${id}/again-${Date.now()}`} className="flex-1 h-12 bg-primary hover:bg-primary-container active:scale-[0.98] text-on-primary rounded-xl font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-sm transition-all">
+                  <span className="material-symbols-outlined text-[20px]">replay</span>
+                  <span>Retake Quiz</span>
+                </a>
+              )}
+              <a href={`#/lesson/${id}`} className="flex-1 h-12 bg-surface-container-low hover:bg-surface-container active:scale-[0.98] text-on-surface font-label-lg text-[15px] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm border border-outline-variant/30">
+                <span className="material-symbols-outlined text-secondary text-[20px]">menu_book</span>
+                <span>Review Lesson</span>
+              </a>
+            </div>
           </div>
-          
-          <div className="flex items-baseline justify-center gap-1 mb-2">
-            <span className="font-headline-lg-mobile text-[36px] text-on-surface font-bold tracking-tight">{r.score}</span>
-            <span className="text-on-surface-variant font-headline-sm text-[20px] font-bold">/ {r.size}</span>
+        )}
+        
+        {/* Remediation Playlist for Missed Sections */}
+        {r.missedSections && r.missedSections.length > 0 && (
+          <div className="w-full bg-surface-container-lowest rounded-xl shadow-sm p-5 mt-4 border border-outline-variant/30 flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
+              <h3 className="font-label-lg text-[16px] font-bold text-primary">Mastery Remediation Path</h3>
+            </div>
+            <p className="font-body-sm text-[13px] text-on-surface-variant">
+              We identified specific textbook sections corresponding to the questions you missed. Listen to these sections to prepare for your retake:
+            </p>
+            <div className="flex flex-col gap-2.5 mt-1">
+              {r.missedSections.map((sec, idx) => (
+                <a
+                  key={idx}
+                  href={`#/lesson/${id}?t=${Math.floor(sec.start)}`}
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container active:scale-[0.99] transition-all border border-outline-variant/20 group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px] shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-label-md text-[13px] font-bold text-on-surface">Page {sec.page + 1}</span>
+                        <span className="text-[11px] font-bold text-secondary bg-secondary-container/30 px-2 py-0.5 rounded-full">
+                          {Math.floor(sec.start / 60)}:{( '0' + Math.floor(sec.start % 60) ).slice(-2)}
+                        </span>
+                      </div>
+                      <p className="font-body-sm text-[12px] text-on-surface-variant truncate mt-0.5">{sec.text}</p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-primary group-hover:translate-x-0.5 transition-transform text-[20px] shrink-0 ml-2">
+                    play_circle
+                  </span>
+                </a>
+              ))}
+            </div>
           </div>
-          
-          <h2 className="font-headline-md text-[24px] text-on-surface font-bold mt-1">Almost there!</h2>
-          
-          <p className="font-body-md text-[14px] text-on-surface-variant max-w-xs mt-2 leading-relaxed">
-            You need {r.passMark}/{r.size} to pass. Review the lesson, then try again in <span className="font-bold text-amber-800">{r.retryAfter}s</span>.
-            {r.attempts >= 3 && <><br/><span className="text-primary font-bold">Tip: listen to the lesson once more.</span></>}
-          </p>
-          
-          <div className="w-full max-w-xs bg-surface-container-high rounded-full h-2 mt-5 mb-2 overflow-hidden flex">
-            <div className="bg-emerald-600 h-full rounded-full" style={{ width: `${percent}%` }}></div>
-          </div>
-          
-          <div className="w-full max-w-xs flex justify-between font-label-sm text-[11px] font-bold text-on-surface-variant mb-6 uppercase tracking-wider">
-            <span>Current: {percent}%</span>
-            <span className="text-amber-900">Required: {Math.round((r.passMark / r.size) * 100)}%</span>
-          </div>
-          
-          <div className="w-full flex flex-col sm:flex-row gap-3">
-            <a href={`#/quiz/${id}/again-${Date.now()}`} className="flex-1 h-12 bg-primary hover:bg-primary-container active:scale-[0.98] text-on-primary rounded-xl font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-sm transition-all">
-              <span className="material-symbols-outlined text-[20px]">replay</span>
-              <span>Try Again</span>
-            </a>
-            <a href={`#/lesson/${id}`} className="flex-1 h-12 bg-surface-container-low hover:bg-surface-container active:scale-[0.98] text-on-surface font-label-lg text-[15px] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm border border-outline-variant/30">
-              <span className="material-symbols-outlined text-secondary text-[20px]">menu_book</span>
-              <span>Review Lesson</span>
-            </a>
-          </div>
-        </div>
+        )}
         
         <div className="-mx-margin-mobile">
           <ReviewSection r={r} />

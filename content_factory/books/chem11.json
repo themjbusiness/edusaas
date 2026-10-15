@@ -1,0 +1,110 @@
+{
+  "id": "chem11",
+  "pdf": "../../books/chem11.pdf",
+  "pdf_page_offset": 0,
+  "subject": "Chemistry",
+  "grade": "Grade 11",
+  "board": "FBISE",
+  "publisher": "National Book Foundation (Federal Textbook Board)",
+  "voice": "en-IN-PrabhatNeural",
+  "rate": "+0%",
+  "units": [
+    {
+      "id": "u1",
+      "number": 1,
+      "title": "Stoichiometry",
+      "lessons": [
+        { "id": "chem11-u1-mole", "topic": "1.1", "title": "Mole and Avogadro's Number", "pages": [1, 2, 3] },
+        { "id": "chem11-u1-limiting-reactant", "topic": "1.2", "title": "Limiting Reactant and Theoretical Yield", "pages": [4, 5, 6] }
+      ]
+    },
+    {
+      "id": "u2",
+      "number": 2,
+      "title": "Atomic Structure",
+      "lessons": [
+        { "id": "chem11-u2-bohr", "topic": "2.1", "title": "Bohr's Atomic Model and Spectra", "pages": [25, 26, 27] }
+      ]
+    },
+    {
+      "id": "u3",
+      "number": 3,
+      "title": "Theories of Covalent Bonding and Shapes of Molecules",
+      "lessons": [
+        { "id": "chem11-u3-vsepr", "topic": "3.1", "title": "VSEPR Theory and Molecular Geometry", "pages": [50, 51, 52] }
+      ]
+    },
+    {
+      "id": "u4",
+      "number": 4,
+      "title": "States of Matter I: Gases",
+      "lessons": [
+        { "id": "chem11-u4-gas-laws", "topic": "4.1", "title": "Gas Laws and Ideal Gas Equation", "pages": [75, 76, 77] }
+      ]
+    },
+    {
+      "id": "u5",
+      "number": 5,
+      "title": "States of Matter II: Liquids",
+      "lessons": [
+        { "id": "chem11-u5-intermolecular", "topic": "5.1", "title": "Intermolecular Forces in Liquids", "pages": [100, 101, 102] }
+      ]
+    },
+    {
+      "id": "u6",
+      "number": 6,
+      "title": "States of Matter III: Solids",
+      "lessons": [
+        { "id": "chem11-u6-crystal-lattice", "topic": "6.1", "title": "Crystalline Solids and Unit Cells", "pages": [125, 126, 127] }
+      ]
+    },
+    {
+      "id": "u7",
+      "number": 7,
+      "title": "Chemical Equilibrium",
+      "lessons": [
+        { "id": "chem11-u7-le-chatelier", "topic": "7.1", "title": "Law of Mass Action and Le Chatelier's Principle", "pages": [150, 151, 152] }
+      ]
+    },
+    {
+      "id": "u8",
+      "number": 8,
+      "title": "Acids, Bases and Salts",
+      "lessons": [
+        { "id": "chem11-u8-ph-buffer", "topic": "8.1", "title": "pH Scale, Ionization and Buffer Solutions", "pages": [175, 176, 177] }
+      ]
+    },
+    {
+      "id": "u9",
+      "number": 9,
+      "title": "Chemical Kinetics",
+      "lessons": [
+        { "id": "chem11-u9-reaction-rate", "topic": "9.1", "title": "Rate of Reaction and Collision Theory", "pages": [200, 201, 202] }
+      ]
+    },
+    {
+      "id": "u10",
+      "number": 10,
+      "title": "Solutions and Colloids",
+      "lessons": [
+        { "id": "chem11-u10-colligative", "topic": "10.1", "title": "Concentration Units and Colligative Properties", "pages": [225, 226, 227] }
+      ]
+    },
+    {
+      "id": "u11",
+      "number": 11,
+      "title": "Thermochemistry",
+      "lessons": [
+        { "id": "chem11-u11-hess-law", "topic": "11.1", "title": "Enthalpy and Hess's Law of Constant Heat Summation", "pages": [250, 251, 252] }
+      ]
+    },
+    {
+      "id": "u12",
+      "number": 12,
+      "title": "Electrochemistry",
+      "lessons": [
+        { "id": "chem11-u12-galvanic", "topic": "12.1", "title": "Oxidation-Reduction and Galvanic Cells", "pages": [275, 276, 277] }
+      ]
+    }
+  ]
+}

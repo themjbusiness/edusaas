@@ -1,0 +1,110 @@
+{
+  "id": "bio11",
+  "pdf": "../../books/bio11.pdf",
+  "pdf_page_offset": 0,
+  "subject": "Biology",
+  "grade": "Grade 11",
+  "board": "FBISE",
+  "publisher": "National Book Foundation (Federal Textbook Board)",
+  "voice": "en-IN-PrabhatNeural",
+  "rate": "+0%",
+  "units": [
+    {
+      "id": "u1",
+      "number": 1,
+      "title": "Cell Structure and Function",
+      "lessons": [
+        { "id": "bio11-u1-organelles", "topic": "1.1", "title": "Ultrastructure of Plant and Animal Cells", "pages": [1, 2, 3] },
+        { "id": "bio11-u1-membrane", "topic": "1.2", "title": "Fluid Mosaic Model and Transport Across Membranes", "pages": [4, 5, 6] }
+      ]
+    },
+    {
+      "id": "u2",
+      "number": 2,
+      "title": "Biological Molecules",
+      "lessons": [
+        { "id": "bio11-u2-carbohydrates-proteins", "topic": "2.1", "title": "Carbohydrates, Lipids and Proteins", "pages": [25, 26, 27] }
+      ]
+    },
+    {
+      "id": "u3",
+      "number": 3,
+      "title": "Enzymes",
+      "lessons": [
+        { "id": "bio11-u3-mechanism", "topic": "3.1", "title": "Mechanism of Enzyme Action and Inhibition", "pages": [45, 46, 47] }
+      ]
+    },
+    {
+      "id": "u4",
+      "number": 4,
+      "title": "Bioenergetics",
+      "lessons": [
+        { "id": "bio11-u4-photosynthesis", "topic": "4.1", "title": "Light and Dark Reactions of Photosynthesis", "pages": [65, 66, 67] }
+      ]
+    },
+    {
+      "id": "u5",
+      "number": 5,
+      "title": "Acellular Life",
+      "lessons": [
+        { "id": "bio11-u5-viruses", "topic": "5.1", "title": "Structure and Replication of Bacteriophages", "pages": [85, 86, 87] }
+      ]
+    },
+    {
+      "id": "u6",
+      "number": 6,
+      "title": "Prokaryotes",
+      "lessons": [
+        { "id": "bio11-u6-bacteria", "topic": "6.1", "title": "Bacterial Morphology and Nutrition", "pages": [105, 106, 107] }
+      ]
+    },
+    {
+      "id": "u7",
+      "number": 7,
+      "title": "Diversity Among Plants",
+      "lessons": [
+        { "id": "bio11-u7-bryophytes-tracheophytes", "topic": "7.1", "title": "Evolution of Vascular Plants and Alternation of Generations", "pages": [125, 126, 127] }
+      ]
+    },
+    {
+      "id": "u8",
+      "number": 8,
+      "title": "Diversity Among Animals",
+      "lessons": [
+        { "id": "bio11-u8-invertebrates-vertebrates", "topic": "8.1", "title": "Invertebrate Phyla and Chordate Characteristics", "pages": [145, 146, 147] }
+      ]
+    },
+    {
+      "id": "u9",
+      "number": 9,
+      "title": "Form and Functions in Plants",
+      "lessons": [
+        { "id": "bio11-u9-transpiration", "topic": "9.1", "title": "Xylem and Phloem Transport in Plants", "pages": [165, 166, 167] }
+      ]
+    },
+    {
+      "id": "u10",
+      "number": 10,
+      "title": "Digestion and Nutrition",
+      "lessons": [
+        { "id": "bio11-u10-human-digestive", "topic": "10.1", "title": "Human Alimentary Canal and Enzymatic Digestion", "pages": [185, 186, 187] }
+      ]
+    },
+    {
+      "id": "u11",
+      "number": 11,
+      "title": "Circulation and Immunity",
+      "lessons": [
+        { "id": "bio11-u11-cardiac-immune", "topic": "11.1", "title": "Human Heart, Cardiac Cycle and Immune Response", "pages": [205, 206, 207] }
+      ]
+    },
+    {
+      "id": "u12",
+      "number": 12,
+      "title": "Respiration",
+      "lessons": [
+        { "id": "bio11-u12-gas-exchange", "topic": "12.1", "title": "Gaseous Exchange in Humans and Respiratory Pigments", "pages": [225, 226, 227] }
+      ]
+    }
+  ]
+}

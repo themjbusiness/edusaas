@@ -43,9 +43,11 @@ PROVIDERS = [SimulatedWhatsApp(), SimulatedSMS()]
 
 
 TITLES = {"absence_alert": "Absence alert", "clearance_granted": "Cleared for class",
-          "clearance_override": "Cleared by the teacher", "weekly_summary": "Weekly summary"}
+          "clearance_override": "Cleared by the teacher", "weekly_summary": "Weekly summary",
+          "parent_nudge": "Urgent: Academic Clearance Notice", "teacher_digest": "Weekly At-Risk Digest"}
 TITLES_UR = {"absence_alert": "غیر حاضری کی اطلاع", "clearance_granted": "کلاس کے لیے کلیئر",
-             "clearance_override": "ٹیچر نے کلیئر کر دیا", "weekly_summary": "ہفتہ وار رپورٹ"}
+             "clearance_override": "ٹیچر نے کلیئر کر دیا", "weekly_summary": "ہفتہ وار رپورٹ",
+             "parent_nudge": "والدین کے لیے فوری اطلاع", "teacher_digest": "ہفتہ وار رپورٹ برائے اساتذہ"}
 
 
 def free_send(student, recipient, role, template, body, lesson=None):

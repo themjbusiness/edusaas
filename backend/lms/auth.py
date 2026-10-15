@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
 from django.core import signing
 from django.core.exceptions import ValidationError
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
@@ -135,6 +135,8 @@ def api(methods=("GET",), roles=None):
                     if request.user.role not in roles:
                         raise ApiError(403, "forbidden", "Your account does not have access to this.")
                 result = fn(request, *args, **kwargs)
+                if isinstance(result, HttpResponse):
+                    return result
                 return JsonResponse(result, safe=False)
             except ApiError as e:
                 return JsonResponse({"error": e.code, "message": e.message}, status=e.status)

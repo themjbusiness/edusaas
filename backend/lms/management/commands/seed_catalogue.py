@@ -12,11 +12,44 @@ SUBJECTS = [("phy", "Physics"), ("chem", "Chemistry"), ("bio", "Biology"), ("mat
             ("eng", "English"), ("cs", "Computer Science")]
 GRADES = {"11": "11th", "12": "12th"}
 
-# Units of the FBISE Physics Grade 11 textbook (National Book Foundation), from its preface.
+# Units of the FBISE textbooks (National Book Foundation / Federal Textbook Board).
 UNITS = {
-    "phy11": ["Physical Quantities and Measurements", "Vectors", "Translatory Motion", "Rotational and Circular Motion",
-              "Work and Kinetic Energy", "Fluid Mechanics", "Physics of Solids", "Heat and Thermodynamics", "Waves",
-              "Electrostatics", "Electricity", "Magnetism", "Relativity", "Particle Physics"],
+    "phy11": [
+        "Physical Quantities and Measurements", "Vectors", "Translatory Motion",
+        "Rotational and Circular Motion", "Work and Kinetic Energy", "Fluid Mechanics",
+        "Physics of Solids", "Heat and Thermodynamics", "Waves", "Electrostatics",
+        "Electricity", "Magnetism", "Relativity", "Particle Physics"
+    ],
+    "chem11": [
+        "Stoichiometry", "Atomic Structure", "Theories of Covalent Bonding and Shapes of Molecules",
+        "States of Matter I: Gases", "States of Matter II: Liquids", "States of Matter III: Solids",
+        "Chemical Equilibrium", "Acids, Bases and Salts", "Chemical Kinetics",
+        "Solutions and Colloids", "Thermochemistry", "Electrochemistry"
+    ],
+    "bio11": [
+        "Cell Structure and Function", "Biological Molecules", "Enzymes",
+        "Bioenergetics", "Acellular Life", "Prokaryotes", "Diversity Among Plants",
+        "Diversity Among Animals", "Form and Functions in Plants", "Digestion and Nutrition",
+        "Circulation and Immunity", "Respiration"
+    ],
+    "math11": [
+        "Complex Numbers", "Matrices and Determinants", "Vectors",
+        "Sequences and Series", "Miscellaneous Series", "Permutation, Combination and Probability",
+        "Mathematical Induction and Binomial Theorem", "Fundamentals of Trigonometry",
+        "Trigonometric Identities", "Trigonometric Functions and Graphs",
+        "Solutions of Triangles", "Inverse Trigonometric Functions"
+    ],
+    "cs11": [
+        "Overview of Computer System", "Computer Architecture", "Central Processing Unit",
+        "Inside the System Unit", "Network Communication", "Wireless Communication",
+        "Database Fundamentals", "Database Management Systems", "Data Security and Privacy",
+        "Operating System Fundamentals"
+    ],
+    "eng11": [
+        "Short Stories", "Plays and Drama", "Poetry and Literary Appreciation",
+        "Reading Comprehension and Synthesis", "Grammar in Context and Sentence Structure",
+        "Composition and Academic Essay Writing", "Technical and Formal Communication"
+    ],
 }
 
 

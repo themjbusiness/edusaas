@@ -21,6 +21,10 @@ import { CollegeAdminActivityLog as Activity } from './screens/stitch/CollegeAdm
 import { CollegeAdminPeopleDirectorySheets as People } from './screens/stitch/CollegeAdminPeopleDirectorySheets';
 import { CollegeAdminClasses as Classes } from './screens/stitch/CollegeAdminClasses';
 import { CollegeAdminCsvImport as Import } from './screens/stitch/CollegeAdminCsvImport';
+import { ReviewList } from './screens/teacher/ReviewList';
+import { ReviewLesson } from './screens/teacher/ReviewLesson';
+import TeacherAtRisk from './screens/teacher/TeacherAtRisk';
+import { PrincipalAnalytics } from './screens/admin/PrincipalAnalytics';
 import { Layout } from './shell/Layout';
 
 // ---------- session ----------
@@ -44,8 +48,12 @@ const ROUTES: Record<string, { roles: Role[]; screen: Screen; nav?: string; play
   child: { roles: ['parent'], screen: Child, nav: 'parent' },
   msgs: { roles: ['teacher', 'parent'], screen: Messages },
   teacher: { roles: ['teacher'], screen: TeacherHome },
+  atRisk: { roles: ['teacher'], screen: TeacherAtRisk, nav: 'atRisk' },
   class: { roles: ['teacher'], screen: ClassPage, nav: 'teacher' },
+  review: { roles: ['teacher'], screen: ReviewList },
+  reviewLesson: { roles: ['teacher'], screen: ReviewLesson, nav: 'review' },
   admin: { roles: ['college_admin'], screen: AdminHome },
+  analytics: { roles: ['college_admin'], screen: PrincipalAnalytics, nav: 'admin' },
   activity: { roles: ['college_admin'], screen: Activity, nav: 'admin' },
   people: { roles: ['college_admin'], screen: People },
   classes: { roles: ['college_admin'], screen: Classes },

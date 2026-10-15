@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import admin_api, api
+from . import admin_api, analytics_api, api, review_api, teacher_api
 
 urlpatterns = [
     path("auth/login", api.login),
@@ -16,6 +16,8 @@ urlpatterns = [
     path("lessons/<str:lesson_id>", api.lesson_detail),
     path("lessons/<str:lesson_id>/progress", api.lesson_progress),
     path("lessons/<str:lesson_id>/quiz", api.quiz_start),
+    path("lessons/<str:lesson_id>/remediation", api.lesson_remediation),
+    path("student/lessons/<str:lesson_id>/remediation", api.lesson_remediation),
     path("quiz/<uuid:attempt_id>/submit", api.quiz_submit),
     path("sync/", api.sync_offline),
     path("teacher/assignments", api.teacher_assignments),
@@ -24,6 +26,9 @@ urlpatterns = [
     path("teacher/assignments/<int:assignment_id>/attendance", api.teacher_attendance),
     path("teacher/clearances/<int:clearance_id>/override", api.teacher_override),
     path("teacher/clearances/<int:clearance_id>/whatsapp-sent", api.teacher_whatsapp_sent),
+    path("teacher/at-risk", teacher_api.teacher_at_risk),
+    path("teacher/at-risk/<str:student_id>/nudge", teacher_api.teacher_nudge_parent),
+    path("teacher/weekly-digest", teacher_api.teacher_weekly_digest),
     path("push/key", api.push_key),
     path("push/subscribe", api.push_subscribe),
     path("push/unsubscribe", api.push_unsubscribe),
@@ -44,4 +49,10 @@ urlpatterns = [
     path("admin/subject-requests/<int:request_id>/decide", admin_api.subject_request_decide),
     path("admin/imports", admin_api.import_check),
     path("admin/imports/<int:batch_id>/commit", admin_api.import_commit),
+    path("review/lessons", review_api.review_lessons),
+    path("review/lessons/<str:lesson_id>", review_api.review_lesson_detail),
+    path("review/lessons/<str:lesson_id>/decide", review_api.review_lesson_decide),
+    path("principal/overview", analytics_api.principal_overview),
+    path("principal/breakdown", analytics_api.principal_breakdown),
+    path("principal/export", analytics_api.principal_export),
 ]

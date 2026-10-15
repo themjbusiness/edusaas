@@ -154,8 +154,20 @@ class Lesson(models.Model):
     duration_sec = models.FloatField()
     sections = models.JSONField(help_text="[{page, text, start}]")
     quiz = models.JSONField(help_text="Question pool with answers. Server-side only.")
-    review_status = models.CharField(max_length=20, default="draft")
-    reviewed_by = models.CharField(max_length=100, blank=True)
+    DRAFT = "draft"
+    IN_REVIEW = "in_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    REVIEW_CHOICES = [
+        (DRAFT, "Draft"),
+        (IN_REVIEW, "In Review"),
+        (APPROVED, "Approved"),
+        (REJECTED, "Rejected"),
+    ]
+    review_status = models.CharField(max_length=20, choices=REVIEW_CHOICES, default=DRAFT)
+    reviewed_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="reviewed_lessons")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True)
     # F12: optional Urdu narration track, reviewed separately.
     ur_audio = models.CharField(max_length=255, blank=True)
     ur_audio_bytes = models.PositiveIntegerField(default=0)
@@ -275,18 +287,27 @@ class Attendance(models.Model):
 
 class Clearance(models.Model):
     """The Green Tick: an absent student must complete the missed lesson's quiz (or be excused)."""
-    PENDING, CLEARED = "pending", "cleared"
+    PENDING = "pending"
+    CLEARED = "cleared"
+    OVERRIDE = "override"
+    LOCKED = "locked"
+    STATUS_CHOICES = [
+        (PENDING, "Pending"),
+        (CLEARED, "Cleared"),
+        (OVERRIDE, "Override"),
+        (LOCKED, "Locked"),
+    ]
     student = models.ForeignKey(User, on_delete=models.PROTECT, related_name="clearances")
     lesson = models.ForeignKey(Lesson, on_delete=models.PROTECT)
     attendance = models.OneToOneField(Attendance, on_delete=models.PROTECT, related_name="clearance")
-    status = models.CharField(max_length=10, default=PENDING, choices=[(PENDING, "Pending"), (CLEARED, "Cleared")])
+    status = models.CharField(max_length=20, default=PENDING, choices=STATUS_CHOICES)
     cleared_by = models.CharField(max_length=10, blank=True, choices=[("quiz", "Passed quiz"), ("teacher", "Teacher")])
     attempts = models.PositiveIntegerField(default=0)
     best_score = models.PositiveIntegerField(null=True, blank=True)
     last_attempt_at = models.DateTimeField(null=True, blank=True)
     cleared_at = models.DateTimeField(null=True, blank=True)
     override_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    override_reason = models.CharField(max_length=200, blank=True)
+    override_reason = models.CharField(max_length=255, blank=True)
     parent_notified_at = models.DateTimeField(null=True, blank=True,
                                               help_text="When the teacher sent the WhatsApp message by hand (F3)")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -317,6 +338,9 @@ class QuizAttempt(models.Model):
     answers = models.JSONField(null=True, blank=True)
     score = models.PositiveIntegerField(null=True, blank=True)
     passed = models.BooleanField(default=False)
+    attempt_number = models.PositiveSmallIntegerField(default=1)
+    missed_sections = models.JSONField(default=list, blank=True)
+    cooldown_until = models.DateTimeField(null=True, blank=True)
     started_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
 

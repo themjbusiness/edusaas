@@ -4,9 +4,9 @@ import type { Role } from '../lib/api';
 
 const NAV: Record<Role, [string, string, string][]> = {
   student: [['home', 'home', 'Home'], ['library', 'menu_book', 'Library']],
-  teacher: [['teacher', 'group', 'My classes'], ['msgs', 'chat', 'Alerts log']],
+  teacher: [['teacher', 'group', 'My classes'], ['atRisk', 'warning', 'At-Risk'], ['review', 'rate_review', 'Review'], ['msgs', 'chat', 'Alerts log']],
   parent: [['parent', 'home', 'My child'], ['msgs', 'chat', 'Messages']],
-  college_admin: [['admin', 'home', 'Home'], ['people', 'group', 'People'], ['classes', 'class', 'Classes'], ['import', 'post_add', 'Import']],
+  college_admin: [['admin', 'home', 'Home'], ['analytics', 'monitoring', 'Analytics'], ['people', 'group', 'People'], ['classes', 'class', 'Classes'], ['import', 'post_add', 'Import']],
 };
 
 import type { Route } from '../lib/router';
@@ -45,6 +45,9 @@ export function Layout({ children, route }: { children: React.ReactNode; route?:
     if (me?.role === 'teacher' && route.name === 'class') {
       crumbs.push({ label: 'My classes', href: '#/teacher' });
     }
+    if (me?.role === 'teacher' && route.name === 'reviewLesson') {
+      crumbs.push({ label: 'Review Content', href: '#/review' });
+    }
     if (me?.role === 'college_admin' && route.name === 'activity') {
       crumbs.push({ label: 'Home', href: '#/admin' });
     }
@@ -52,7 +55,8 @@ export function Layout({ children, route }: { children: React.ReactNode; route?:
     const currentLabels: Record<string, string> = {
       home: 'Home', library: 'Library', subject: 'Subject', lesson: 'Lesson', quiz: 'Quiz',
       parent: 'My child', child: 'Child Details', msgs: 'Messages', teacher: 'My classes',
-      class: 'Class Details', admin: 'Home', activity: 'Activity Log', people: 'People',
+      atRisk: 'At-Risk Catch-Up', class: 'Class Details', review: 'Review Content', reviewLesson: 'Curate Lesson',
+      admin: 'Home', activity: 'Activity Log', people: 'People',
       classes: 'Classes', import: 'Import Data', gallery: 'Gallery'
     };
     

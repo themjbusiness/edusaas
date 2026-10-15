@@ -27,7 +27,7 @@ def summary_text(student, start, end, lang="en"):
     total = att.count()
     present = att.filter(status__in=(Attendance.PRESENT, Attendance.LATE)).count()
     absences = Clearance.objects.filter(student=student, attendance__date__range=(start, end))
-    cleared = absences.filter(status=Clearance.CLEARED).count()
+    cleared = absences.filter(status__in=(Clearance.CLEARED, Clearance.OVERRIDE)).count()
     data = child_progress(student)
     if lang == "ur":
         return summary_text_ur(student, start, end, total, present, absences, cleared, data)

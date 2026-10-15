@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from .models import Clearance, LessonProgress, Notification, OTPCode, User
+from .models import Clearance, Lesson, LessonProgress, Notification, OTPCode, QuizAttempt, User
 from .fields import hash_phone
 
 A_TEACHER, B_TEACHER = "+923991110001", "+923991110002"
@@ -31,7 +31,11 @@ class ApiBase(TestCase):
             kw["HTTP_AUTHORIZATION"] = f"Bearer {token}"
         fn = getattr(self.client, method)
         resp = fn("/api/" + url, data=json.dumps(body) if body is not None else None, **kw)
-        return resp.status_code, resp.json()
+        try:
+            payload = resp.json()
+        except Exception:
+            payload = resp.content.decode("utf-8")
+        return resp.status_code, payload
 
     def login(self, phone):
         from .fields import hash_phone
@@ -1079,4 +1083,706 @@ class PhoneAdminAuthTest(ApiBase):
             "password": "studentpass123",
         })
         self.assertEqual(response.status_code, 200)
+
+
+class TeacherReviewTest(ApiBase):
+    def setUp(self):
+        super().setUp()
+        self.teacher_token = self.login(A_TEACHER)
+        self.chem_teacher_token = self.login("+923991110003")
+        self.student_token = self.login(ALI)
+        self.admin_user = User.objects.get(phone_number_hash=hash_phone("+923999990000"))
+        from .auth import issue_token
+        self.admin_token = issue_token(self.admin_user)
+
+    def test_teacher_lists_reviewable_lessons(self):
+        # 1. Physics teacher can list Physics lessons
+        status, data = self.call("get", "review/lessons", token=self.teacher_token)
+        self.assertEqual(status, 200)
+        self.assertTrue(len(data) >= 1)
+        for l in data:
+            self.assertEqual(l["subjectCode"], "phy11")
+
+        # 2. Chemistry teacher gets 0 lessons because Chemistry has no lessons yet
+        status, chem_data = self.call("get", "review/lessons", token=self.chem_teacher_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(len(chem_data), 0)
+
+        # 3. Content admin sees all lessons
+        status, admin_data = self.call("get", "review/lessons", token=self.admin_token)
+        self.assertEqual(status, 200)
+        self.assertGreaterEqual(len(admin_data), len(data))
+
+    def test_unauthorized_subject_access_refusal(self):
+        # Chemistry teacher tries to view Physics lesson
+        status, data = self.call("get", f"review/lessons/{LESSON}", token=self.chem_teacher_token)
+        self.assertEqual(status, 403)
+        self.assertEqual(data["error"], "forbidden")
+
+        # Chemistry teacher tries to edit Physics lesson
+        status, data = self.call("put", f"review/lessons/{LESSON}", {"sections": []}, token=self.chem_teacher_token)
+        self.assertEqual(status, 403)
+
+        # Chemistry teacher tries to approve Physics lesson
+        status, data = self.call("post", f"review/lessons/{LESSON}/decide", {"action": "approve"}, token=self.chem_teacher_token)
+        self.assertEqual(status, 403)
+
+        # Student gets 403 on review endpoints
+        status, _ = self.call("get", "review/lessons", token=self.student_token)
+        self.assertEqual(status, 403)
+
+    def test_student_isolation_from_unapproved_content(self):
+        lesson = Lesson.objects.get(id=LESSON)
+        lesson.review_status = Lesson.IN_REVIEW
+        lesson.save()
+
+        # Student cannot see in_review lesson
+        status, _ = self.call("get", f"lessons/{LESSON}", token=self.student_token)
+        self.assertEqual(status, 404)
+
+        # Rejected lesson is also hidden from student
+        lesson.review_status = Lesson.REJECTED
+        lesson.save()
+        status, _ = self.call("get", f"lessons/{LESSON}", token=self.student_token)
+        self.assertEqual(status, 404)
+
+    def test_content_edits_persisted(self):
+        # Teacher retrieves full lesson
+        status, detail = self.call("get", f"review/lessons/{LESSON}", token=self.teacher_token)
+        self.assertEqual(status, 200)
+        self.assertIn("sections", detail)
+        self.assertIn("quiz", detail)
+
+        # Modify sections and quiz
+        updated_sections = [{"page": 8, "text": "Curated introductory paragraph.", "start": 0.0}]
+        updated_quiz = [{
+            "question": "What is the standard unit of length in SI?",
+            "options": ["Meter", "Centimeter", "Kilometer", "Millimeter"],
+            "answer": 0,
+        }]
+        edit_payload = {
+            "sections": updated_sections,
+            "quiz": updated_quiz,
+            "review_notes": "Corrected transcript wording.",
+        }
+        status, updated = self.call("put", f"review/lessons/{LESSON}", edit_payload, token=self.teacher_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(updated["sections"], updated_sections)
+        self.assertEqual(updated["quiz"], updated_quiz)
+        self.assertEqual(updated["reviewNotes"], "Corrected transcript wording.")
+
+        # Re-fetch to ensure persistence
+        status, refetched = self.call("get", f"review/lessons/{LESSON}", token=self.teacher_token)
+        self.assertEqual(refetched["sections"], updated_sections)
+        self.assertEqual(refetched["quiz"], updated_quiz)
+
+        # Validation checks
+        bad_quiz = [{"question": "Q?", "options": ["A"], "answer": 0}]  # < 2 options
+        status, _ = self.call("put", f"review/lessons/{LESSON}", {"quiz": bad_quiz}, token=self.teacher_token)
+        self.assertEqual(status, 400)
+
+        bad_answer = [{"question": "Q?", "options": ["A", "B"], "answer": 5}]  # out of bounds
+        status, _ = self.call("put", f"review/lessons/{LESSON}", {"quiz": bad_answer}, token=self.teacher_token)
+        self.assertEqual(status, 400)
+
+    def test_approve_transitions_status_and_unlocks_for_students(self):
+        lesson = Lesson.objects.get(id=LESSON)
+        lesson.review_status = Lesson.IN_REVIEW
+        lesson.save()
+
+        # Student cannot view while in_review
+        self.assertEqual(self.call("get", f"lessons/{LESSON}", token=self.student_token)[0], 404)
+
+        # Teacher approves lesson
+        decide_payload = {
+            "action": "approve",
+            "notes": "Verified against FBISE 2026 textbook edition.",
+        }
+        status, resp = self.call("post", f"review/lessons/{LESSON}/decide", decide_payload, token=self.teacher_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(resp["status"], "approved")
+        self.assertIn("Mr. Tariq Mehmood", resp["reviewedBy"])
+        self.assertIsNotNone(resp["reviewedAt"])
+        self.assertEqual(resp["reviewNotes"], decide_payload["notes"])
+
+        # Now student can see and access the lesson
+        status, student_lesson = self.call("get", f"lessons/{LESSON}", token=self.student_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(student_lesson["id"], LESSON)
+
+
+class MasteryRemediationTest(ApiBase):
+    def mark_absent(self, token, *names, lesson=LESSON):
+        status, assignments = self.call("get", "teacher/assignments", token=token)
+        aid = assignments[0]["id"]
+        _, cls = self.call("get", f"teacher/assignments/{aid}", token=token)
+        statuses = {s["id"]: ("absent" if s["name"] in names else "present") for s in cls["students"]}
+        return self.call("post", f"teacher/assignments/{aid}/attendance",
+                         {"lesson": lesson, "statuses": statuses}, token=token)
+
+    def listen_all(self, token, lesson=LESSON):
+        self.call("get", f"lessons/{lesson}", token=token)
+        prog = LessonProgress.objects.get(student__phone_number_hash=hash_phone(ALI), lesson_id=lesson)
+        prog.updated_at = timezone.now() - timedelta(hours=1)
+        LessonProgress.objects.filter(pk=prog.pk).update(updated_at=prog.updated_at)
+        return self.call("post", f"lessons/{lesson}/progress", {"secs": list(range(0, 400))}, token=token)
+
+    def setUp(self):
+        super().setUp()
+        self.teacher_token = self.login(A_TEACHER)
+        self.student_token = self.login(ALI)
+        # Mark student absent so clearance record exists
+        self.mark_absent(self.teacher_token, "Ali Raza")
+        # Ensure student has listened to lesson so quiz is unlocked
+        self.listen_all(self.student_token)
+
+    def test_failed_quiz_sets_attempt_number_cooldown_and_missed_sections(self):
+        status, quiz = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(quiz["attemptNumber"], 1)
+        self.assertEqual(quiz["maxAttempts"], 3)
+
+        # Submit all wrong answers
+        wrong_answers = [99] * len(quiz["questions"])
+        status, res = self.call("post", f"quiz/{quiz['attempt']}/submit", {"answers": wrong_answers}, token=self.student_token)
+        self.assertEqual(status, 200)
+        self.assertFalse(res["passed"])
+        self.assertEqual(res["score"], 0)
+        self.assertEqual(res["attemptNumber"], 1)
+        self.assertFalse(res["locked"])
+        self.assertGreater(res["retryAfter"], 0)
+        self.assertTrue(len(res["missedSections"]) > 0)
+        self.assertIsNotNone(res["cooldownUntil"])
+
+        # Verify DB attempt record
+        attempt = QuizAttempt.objects.get(id=quiz["attempt"])
+        self.assertEqual(attempt.attempt_number, 1)
+        self.assertEqual(attempt.score, 0)
+        self.assertFalse(attempt.passed)
+        self.assertIsNotNone(attempt.cooldown_until)
+        self.assertTrue(len(attempt.missed_sections) > 0)
+
+    def test_cooldown_enforcement_blocks_early_retake(self):
+        # First failed attempt
+        _, quiz = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+        self.call("post", f"quiz/{quiz['attempt']}/submit", {"answers": [99] * len(quiz["questions"])}, token=self.student_token)
+
+        # Retrying immediately should trigger 429 cooldown
+        status, res = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+        self.assertEqual(status, 429)
+        self.assertEqual(res.get("error"), "cooldown")
+
+    def test_remediation_endpoint_returns_cooldown_and_missed_sections(self):
+        # First failed attempt
+        _, quiz = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+        self.call("post", f"quiz/{quiz['attempt']}/submit", {"answers": [99] * len(quiz["questions"])}, token=self.student_token)
+
+        # Call remediation endpoint
+        status, data = self.call("get", f"lessons/{LESSON}/remediation", token=self.student_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(data["attemptCount"], 1)
+        self.assertEqual(data["maxAttempts"], 3)
+        self.assertFalse(data["locked"])
+        self.assertFalse(data["passed"])
+        self.assertGreater(data["cooldownSecondsLeft"], 0)
+        self.assertTrue(len(data["missedSections"]) > 0)
+
+        # Also test student alias endpoint
+        status_alias, data_alias = self.call("get", f"student/lessons/{LESSON}/remediation", token=self.student_token)
+        self.assertEqual(status_alias, 200)
+        self.assertEqual(data_alias["attemptCount"], 1)
+
+    def test_three_consecutive_failures_locks_clearance_and_blocks_retake(self):
+        for attempt_num in range(1, 4):
+            # Advance cooldown if any past attempt exists
+            QuizAttempt.objects.filter(student__phone_number_hash=hash_phone(ALI)).update(
+                cooldown_until=timezone.now() - timedelta(minutes=1)
+            )
+            status, quiz = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+            self.assertEqual(status, 200)
+            self.assertEqual(quiz["attemptNumber"], attempt_num)
+            
+            status, res = self.call("post", f"quiz/{quiz['attempt']}/submit", {"answers": [99] * len(quiz["questions"])}, token=self.student_token)
+            self.assertEqual(status, 200)
+            if attempt_num == 3:
+                self.assertTrue(res["locked"])
+
+        # Clearance should now be LOCKED
+        c = Clearance.objects.get(student__phone_number_hash=hash_phone(ALI), lesson_id=LESSON)
+        self.assertEqual(c.status, Clearance.LOCKED)
+        self.assertEqual(c.attempts, 3)
+
+        # Even if cooldown has passed, student cannot start 4th quiz attempt
+        QuizAttempt.objects.filter(student__phone_number_hash=hash_phone(ALI)).update(
+            cooldown_until=timezone.now() - timedelta(minutes=1)
+        )
+        status, res = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+        self.assertEqual(status, 403)
+        self.assertEqual(res.get("error"), "locked")
+
+        # Remediation endpoint reports locked = True
+        status, rem = self.call("get", f"lessons/{LESSON}/remediation", token=self.student_token)
+        self.assertEqual(status, 200)
+        self.assertTrue(rem["locked"])
+        self.assertEqual(rem["attemptCount"], 3)
+
+    def test_teacher_override_unlocks_locked_clearance_and_sets_status(self):
+        # Fail 3 times to lock
+        for _ in range(3):
+            QuizAttempt.objects.filter(student__phone_number_hash=hash_phone(ALI)).update(
+                cooldown_until=timezone.now() - timedelta(minutes=1)
+            )
+            _, quiz = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+            self.call("post", f"quiz/{quiz['attempt']}/submit", {"answers": [99] * len(quiz["questions"])}, token=self.student_token)
+
+        c = Clearance.objects.get(student__phone_number_hash=hash_phone(ALI), lesson_id=LESSON)
+        self.assertEqual(c.status, Clearance.LOCKED)
+
+        # Teacher grants override
+        override_payload = {"reason": "Oral viva conducted and student demonstrated 85% mastery"}
+        status, resp = self.call("post", f"teacher/clearances/{c.id}/override", override_payload, token=self.teacher_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(resp["status"], "override")
+        self.assertEqual(resp["clearedBy"], "teacher")
+        self.assertEqual(resp["overrideReason"], override_payload["reason"])
+
+        # DB verification
+        c.refresh_from_db()
+        self.assertEqual(c.status, Clearance.OVERRIDE)
+        self.assertEqual(c.cleared_by, "teacher")
+
+        # Student progress is unlocked and passed
+        prog = LessonProgress.objects.get(student__phone_number_hash=hash_phone(ALI), lesson_id=LESSON)
+        self.assertTrue(prog.passed)
+        self.assertTrue(prog.unlocked)
+
+    def test_cross_teacher_cannot_override_locked_clearance(self):
+        # Fail 3 times
+        for _ in range(3):
+            QuizAttempt.objects.filter(student__phone_number_hash=hash_phone(ALI)).update(
+                cooldown_until=timezone.now() - timedelta(minutes=1)
+            )
+            _, quiz = self.call("post", f"lessons/{LESSON}/quiz", token=self.student_token)
+            self.call("post", f"quiz/{quiz['attempt']}/submit", {"answers": [99] * len(quiz["questions"])}, token=self.student_token)
+
+        c = Clearance.objects.get(student__phone_number_hash=hash_phone(ALI), lesson_id=LESSON)
+        b_teacher_token = self.login(B_TEACHER)
+        status, _ = self.call("post", f"teacher/clearances/{c.id}/override", {"reason": "Unauthorized override attempt"}, token=b_teacher_token)
+        self.assertIn(status, [403, 404])
+
+
+class PrincipalAnalyticsTest(ApiBase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from .models import College, SchoolClass, StudentProfile
+        cls.other_college = College.objects.create(name="Beaconhouse College")
+        cls.other_admin = User.objects.create_user(OTHER_ADMIN, "Other Principal", User.COLLEGE_ADMIN,
+                                                  college=cls.other_college, gender="female")
+        cls.other_class = SchoolClass.objects.create(college=cls.other_college, grade="11th", stream="Pre-Engineering",
+                                                    section="A", academic_year="2026-2027", gender="mixed")
+        cls.other_student = User.objects.create_user("+923992229988", "Other College Student", User.STUDENT,
+                                                    college=cls.other_college, gender="male")
+        other_parent = User.objects.create_user("+923993339988", "Other College Parent", User.PARENT,
+                                                college=cls.other_college, gender="male")
+        StudentProfile.objects.create(user=cls.other_student, school_class=cls.other_class, roll_number="BH-101",
+                                      parent=other_parent)
+
+    def setUp(self):
+        super().setUp()
+        self.admin_token = self.login(COLLEGE_ADMIN)
+        self.other_admin_token = self.login(OTHER_ADMIN)
+        self.teacher_token = self.login(A_TEACHER)
+        self.student_token = self.login(ALI)
+
+    def test_role_protection_blocks_non_admin(self):
+        # Teacher calling principal overview gets 403
+        status, data = self.call("get", "principal/overview", token=self.teacher_token)
+        self.assertEqual(status, 403)
+        self.assertEqual(data["error"], "forbidden")
+
+        # Student calling principal overview gets 403
+        status, data = self.call("get", "principal/overview", token=self.student_token)
+        self.assertEqual(status, 403)
+
+        # Unauthenticated gets 401
+        status, data = self.call("get", "principal/overview")
+        self.assertEqual(status, 401)
+
+    def test_kpi_calculations_and_clearance_rate(self):
+        from .models import Attendance, Clearance, Lesson, SchoolClass, Subject
+        Clearance.objects.all().delete()
+        Attendance.objects.all().delete()
+
+        admin_user = User.objects.get(phone_number_hash=hash_phone(COLLEGE_ADMIN))
+        college = admin_user.college
+        school_class = SchoolClass.objects.filter(college=college).first()
+        subject = Subject.objects.first()
+        lesson = Lesson.objects.first()
+        student = User.objects.filter(student__school_class=school_class).first()
+        teacher = User.objects.filter(role=User.TEACHER, college=college).first()
+
+        now = timezone.now()
+        today = timezone.localdate()
+
+        # Create 10 absences, 8 cleared (80.0% clearance rate)
+        for i in range(10):
+            att = Attendance.objects.create(
+                school_class=school_class,
+                student=student,
+                subject=subject,
+                date=today - timedelta(days=i),
+                status=Attendance.ABSENT,
+                marked_by=teacher
+            )
+            is_cleared = i < 8
+            Clearance.objects.create(
+                attendance=att,
+                student=student,
+                lesson=lesson,
+                status=Clearance.CLEARED if is_cleared else Clearance.PENDING,
+                attempts=1 if is_cleared else 0,
+                cleared_at=now if is_cleared else None
+            )
+
+        status, data = self.call("get", "principal/overview?days=30", token=self.admin_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(data["totalAbsences"], 10)
+        self.assertEqual(data["clearedCount"], 8)
+        self.assertEqual(data["clearanceRate"], 80.0)
+
+    def test_median_latency_computation(self):
+        from .models import Attendance, Clearance, Lesson, SchoolClass, Subject
+        Clearance.objects.all().delete()
+        Attendance.objects.all().delete()
+
+        admin_user = User.objects.get(phone_number_hash=hash_phone(COLLEGE_ADMIN))
+        college = admin_user.college
+        school_class = SchoolClass.objects.filter(college=college).first()
+        subject = Subject.objects.first()
+        lesson = Lesson.objects.first()
+        student = User.objects.filter(student__school_class=school_class).first()
+        teacher = User.objects.filter(role=User.TEACHER, college=college).first()
+
+        now = timezone.now()
+        today = timezone.localdate()
+
+        # Clearances completed at 2h, 4h, and 12h
+        durations = [2, 4, 12]
+        for i, h in enumerate(durations):
+            att = Attendance.objects.create(
+                school_class=school_class,
+                student=student,
+                subject=subject,
+                date=today - timedelta(days=i),
+                status=Attendance.ABSENT,
+                marked_by=teacher
+            )
+            created = now - timedelta(hours=h)
+            c = Clearance.objects.create(
+                attendance=att,
+                student=student,
+                lesson=lesson,
+                status=Clearance.CLEARED,
+                attempts=1,
+                cleared_at=now
+            )
+            Clearance.objects.filter(id=c.id).update(created_at=created)
+
+        status, data = self.call("get", "principal/overview?days=30", token=self.admin_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(data["medianHoursToClear"], 4.0)
+
+    def test_strict_college_isolation(self):
+        from .models import Attendance, Clearance, Lesson, Subject
+        subject = Subject.objects.first()
+        lesson = Lesson.objects.first()
+        att = Attendance.objects.create(
+            school_class=self.other_class,
+            student=self.other_student,
+            subject=subject,
+            date=timezone.localdate(),
+            status=Attendance.ABSENT,
+            marked_by=self.other_admin
+        )
+        Clearance.objects.create(
+            attendance=att,
+            student=self.other_student,
+            lesson=lesson,
+            status=Clearance.PENDING,
+            attempts=0
+        )
+
+        # Admin of Margalla Heights calls overview
+        status, data = self.call("get", "principal/overview", token=self.admin_token)
+        self.assertEqual(status, 200)
+        self.assertIn("Margalla Heights College", data["college"])
+
+        # Admin of Other College calls overview
+        other_status, other_data = self.call("get", "principal/overview", token=self.other_admin_token)
+        self.assertEqual(other_status, 200)
+        self.assertEqual(other_data["college"], "Beaconhouse College")
+        self.assertEqual(other_data["totalAbsences"], 1)
+
+    def test_class_breakdown(self):
+        status, data = self.call("get", "principal/breakdown?by=class", token=self.admin_token)
+        self.assertEqual(status, 200)
+        self.assertTrue(isinstance(data, list))
+        self.assertTrue(len(data) > 0)
+        first = data[0]
+        self.assertIn("name", first)
+        self.assertIn("studentCount", first)
+        self.assertIn("absences", first)
+        self.assertIn("clearances", first)
+        self.assertIn("rate", first)
+
+    def test_csv_export_generation(self):
+        status, content = self.call("get", "principal/export?format=csv", token=self.admin_token)
+        self.assertEqual(status, 200)
+        lines = content.strip().split("\n")
+        self.assertTrue(len(lines) >= 1)
+        header = lines[0].strip()
+        self.assertEqual(header, "Date,Student Name,Roll Number,Class,Subject,Status,Cleared At")
+
+
+class TeacherAtRiskTest(ApiBase):
+    def setUp(self):
+        super().setUp()
+        self.teacher_a_token = self.login(A_TEACHER)
+        self.teacher_b_token = self.login(B_TEACHER)
+        self.student_token = self.login(ALI)
+        self.parent_token = self.login(ALI_PARENT)
+        self.ali = User.objects.get(phone_number_hash=hash_phone(ALI))
+        self.saad = User.objects.get(phone_number_hash=hash_phone(SAAD))
+
+    def test_chronic_absence_detection(self):
+        # Create 2 unexcused absences with pending clearances for ALI
+        from .models import Attendance, Clearance, Lesson, Subject
+        Clearance.objects.filter(student=self.ali).delete()
+        Attendance.objects.filter(student=self.ali).delete()
+
+        subject = Subject.objects.first()
+        lessons = list(Lesson.objects.all()[:2])
+        today = timezone.localdate()
+
+        for i, lesson in enumerate(lessons):
+            att = Attendance.objects.create(
+                school_class=self.ali.student.school_class,
+                student=self.ali,
+                subject=subject,
+                date=today - timedelta(days=i + 1),
+                status=Attendance.ABSENT,
+                marked_by=User.objects.get(phone_number_hash=hash_phone(A_TEACHER))
+            )
+            Clearance.objects.create(
+                attendance=att,
+                student=self.ali,
+                lesson=lesson,
+                status=Clearance.PENDING,
+                attempts=0
+            )
+
+        status, data = self.call("get", "teacher/at-risk", token=self.teacher_a_token)
+        self.assertEqual(status, 200)
+        ali_record = next((s for s in data if s["studentId"] == str(self.ali.id)), None)
+        self.assertIsNotNone(ali_record)
+        self.assertEqual(ali_record["unclearedCount"], 2)
+        self.assertEqual(ali_record["name"], self.ali.full_name)
+
+    def test_quiz_failure_escalation_detection(self):
+        # 3 consecutive failed quiz attempts for ALI on a lesson
+        from .models import QuizAttempt, Lesson
+        QuizAttempt.objects.filter(student=self.ali).delete()
+        lesson = Lesson.objects.first()
+
+        now = timezone.now()
+        for attempt_num in range(1, 4):
+            QuizAttempt.objects.create(
+                student=self.ali,
+                lesson=lesson,
+                questions=[{"q": 0, "order": [0, 1, 2, 3]}],
+                answers=[1],
+                score=40,
+                passed=False,
+                attempt_number=attempt_num,
+                started_at=now + timedelta(minutes=attempt_num * 10)
+            )
+
+        status, data = self.call("get", "teacher/at-risk", token=self.teacher_a_token)
+        self.assertEqual(status, 200)
+        ali_record = next((s for s in data if s["studentId"] == str(self.ali.id)), None)
+        self.assertIsNotNone(ali_record)
+        self.assertTrue(ali_record["isEscalated"])
+        self.assertEqual(ali_record["quizFailureCount"], 3)
+
+    def test_teacher_class_scoping(self):
+        # Both ALI (Section A) and SAAD (Section B) are at risk
+        from .models import Attendance, Clearance, Lesson, Subject
+        Clearance.objects.all().delete()
+        Attendance.objects.all().delete()
+        lesson = Lesson.objects.first()
+        subject = Subject.objects.first()
+        today = timezone.localdate()
+
+        for student, teacher_phone in [(self.ali, A_TEACHER), (self.saad, B_TEACHER)]:
+            for i in range(2):
+                att = Attendance.objects.create(
+                    school_class=student.student.school_class,
+                    student=student,
+                    subject=subject,
+                    date=today - timedelta(days=i + 1),
+                    status=Attendance.ABSENT,
+                    marked_by=User.objects.get(phone_number_hash=hash_phone(teacher_phone))
+                )
+                Clearance.objects.create(
+                    attendance=att,
+                    student=student,
+                    lesson=lesson,
+                    status=Clearance.PENDING,
+                    attempts=0
+                )
+
+        # Teacher A only sees Section A students (ALI), never Section B (SAAD)
+        status, data_a = self.call("get", "teacher/at-risk", token=self.teacher_a_token)
+        self.assertEqual(status, 200)
+        ids_a = [s["studentId"] for s in data_a]
+        self.assertIn(str(self.ali.id), ids_a)
+        self.assertNotIn(str(self.saad.id), ids_a)
+
+        # Teacher B only sees Section B students (SAAD), never Section A (ALI)
+        status, data_b = self.call("get", "teacher/at-risk", token=self.teacher_b_token)
+        self.assertEqual(status, 200)
+        ids_b = [s["studentId"] for s in data_b]
+        self.assertIn(str(self.saad.id), ids_b)
+        self.assertNotIn(str(self.ali.id), ids_b)
+
+    def test_parent_nudge_delivery(self):
+        # Teacher A nudges ALI's parent
+        from .models import Notification
+        Notification.objects.filter(recipient__phone_number_hash=hash_phone(ALI_PARENT)).delete()
+
+        status, data = self.call("post", f"teacher/at-risk/{self.ali.id}/nudge", {"channel": "push"}, token=self.teacher_a_token)
+        self.assertEqual(status, 200)
+        self.assertTrue(data["success"])
+
+        # Check in-app notification created for linked parent
+        n = Notification.objects.filter(
+            recipient__phone_number_hash=hash_phone(ALI_PARENT),
+            template_type="parent_nudge"
+        ).first()
+        self.assertIsNotNone(n)
+        self.assertEqual(n.channel, "inbox")
+        self.assertEqual(n.status, "delivered")
+        self.assertIn(self.ali.full_name, n.body)
+
+        # Teacher cannot nudge student from another class
+        status_forbidden, _ = self.call("post", f"teacher/at-risk/{self.saad.id}/nudge", {"channel": "push"}, token=self.teacher_a_token)
+        self.assertEqual(status_forbidden, 403)
+
+    def test_unauthorized_access_refusal(self):
+        # Student calling /api/teacher/at-risk -> 403
+        status_student, _ = self.call("get", "teacher/at-risk", token=self.student_token)
+        self.assertEqual(status_student, 403)
+
+        # Parent calling /api/teacher/at-risk -> 403
+        status_parent, _ = self.call("get", "teacher/at-risk", token=self.parent_token)
+        self.assertEqual(status_parent, 403)
+
+    def test_teacher_weekly_digest_and_management_command(self):
+        # Test weekly-digest endpoint
+        status, data = self.call("get", "teacher/weekly-digest", token=self.teacher_a_token)
+        self.assertEqual(status, 200)
+        self.assertIn("weekStart", data)
+        self.assertIn("weekEnd", data)
+        self.assertIn("totalAbsences", data)
+        self.assertIn("totalCleared", data)
+        self.assertIn("atRiskStudents", data)
+
+        # Test send_teacher_digests command
+        from django.core.management import call_command
+        import io
+        out = io.StringIO()
+        call_command("send_teacher_digests", stdout=out)
+        self.assertIn("Teacher digests for week ending", out.getvalue())
+
+
+class SyllabusPipelineTest(ApiBase):
+    def test_full_fbise_catalogue_seeding(self):
+        from django.core.management import call_command
+        import io
+        from .models import Subject, Unit
+
+        out = io.StringIO()
+        call_command("seed_catalogue", stdout=out)
+        self.assertIn("Catalogue: 12 subjects, 67 units", out.getvalue())
+
+        # Verify unit counts for FBISE 11th subjects
+        self.assertEqual(Unit.objects.filter(subject__code="phy11").count(), 14)
+        self.assertEqual(Unit.objects.filter(subject__code="chem11").count(), 12)
+        self.assertEqual(Unit.objects.filter(subject__code="bio11").count(), 12)
+        self.assertEqual(Unit.objects.filter(subject__code="math11").count(), 12)
+        self.assertEqual(Unit.objects.filter(subject__code="cs11").count(), 10)
+        self.assertEqual(Unit.objects.filter(subject__code="eng11").count(), 7)
+
+    def test_import_lessons_execution(self):
+        from django.core.management import call_command
+        import io
+        from .models import Lesson, Subject
+
+        out = io.StringIO()
+        call_command("import_lessons", "phy11", stdout=out)
+        self.assertIn("imported", out.getvalue())
+        self.assertTrue(Lesson.objects.filter(book="phy11").exists())
+
+        # Test multi-book / all mode
+        out_all = io.StringIO()
+        call_command("import_lessons", "all", stdout=out_all)
+        self.assertIn("Total:", out_all.getvalue())
+
+    @override_settings(SHOW_DRAFT_LESSONS=False)
+    def test_quality_gate_draft_isolation_from_students(self):
+        from .models import Lesson, Subject, Unit, TeachingAssignment, SchoolClass
+        # Create a draft lesson in Chemistry
+        chem = Subject.objects.get(code="chem11")
+        unit = Unit.objects.filter(subject=chem).first()
+        draft_lesson = Lesson.objects.create(
+            id="chem-draft-test",
+            subject=chem,
+            unit=unit,
+            book="chem11",
+            unit_number=unit.number,
+            unit_title=unit.title,
+            topic="1.1",
+            title="Draft Topic Test",
+            pages=[1, 2],
+            images=["pages/p1.webp"],
+            audio="audio.mp3",
+            audio_bytes=1000,
+            duration_sec=60.0,
+            sections=[{"page": 1, "text": "Draft text", "start": 0}],
+            quiz=[{"question": "Q?", "options": ["a", "b", "c", "d"], "answer": 0, "explanation": "e"}],
+            review_status=Lesson.DRAFT,
+            is_published=True
+        )
+
+        # Student calls lesson detail -> 404
+        ali_token = self.login(ALI)
+        status, _ = self.call("get", f"lessons/{draft_lesson.id}", token=ali_token)
+        self.assertEqual(status, 404)
+
+        # Teacher of that subject calls review lesson -> 200
+        ali_user = User.objects.get(phone_number_hash=hash_phone(ALI))
+        teacher = User.objects.get(phone_number_hash=hash_phone(A_TEACHER))
+        TeachingAssignment.objects.get_or_create(teacher=teacher, school_class=ali_user.student.school_class, subject=chem)
+
+        teacher_token = self.login(A_TEACHER)
+        status_review, data_review = self.call("get", f"review/lessons/{draft_lesson.id}", token=teacher_token)
+        self.assertEqual(status_review, 200)
+        self.assertEqual(data_review["id"], draft_lesson.id)
+        self.assertEqual(data_review["status"], "draft")
+
+
+
+
+
 

@@ -18,6 +18,110 @@
         { "id": "u1-derived-units", "topic": "1.2", "title": "Derived Units in Terms of Base Units", "pages": [10, 11] },
         { "id": "u1-dimensions", "topic": "1.3", "title": "Dimensions of Physical Quantities", "pages": [11, 12, 13, 14] }
       ]
+    },
+    {
+      "id": "u2",
+      "number": 2,
+      "title": "Vectors",
+      "lessons": [
+        { "id": "phy11-u2-addition", "topic": "2.1", "title": "Rectangular Components and Vector Addition", "pages": [25, 26, 27] }
+      ]
+    },
+    {
+      "id": "u3",
+      "number": 3,
+      "title": "Translatory Motion",
+      "lessons": [
+        { "id": "phy11-u3-projectile", "topic": "3.1", "title": "Projectile Motion and Trajectory", "pages": [50, 51, 52] }
+      ]
+    },
+    {
+      "id": "u4",
+      "number": 4,
+      "title": "Rotational and Circular Motion",
+      "lessons": [
+        { "id": "phy11-u4-centripetal", "topic": "4.1", "title": "Centripetal Acceleration and Moment of Inertia", "pages": [75, 76, 77] }
+      ]
+    },
+    {
+      "id": "u5",
+      "number": 5,
+      "title": "Work and Kinetic Energy",
+      "lessons": [
+        { "id": "phy11-u5-work-energy-theorem", "topic": "5.1", "title": "Work-Energy Theorem and Conservative Fields", "pages": [100, 101, 102] }
+      ]
+    },
+    {
+      "id": "u6",
+      "number": 6,
+      "title": "Fluid Mechanics",
+      "lessons": [
+        { "id": "phy11-u6-bernoulli", "topic": "6.1", "title": "Equation of Continuity and Bernoulli's Principle", "pages": [125, 126, 127] }
+      ]
+    },
+    {
+      "id": "u7",
+      "number": 7,
+      "title": "Physics of Solids",
+      "lessons": [
+        { "id": "phy11-u7-stress-strain", "topic": "7.1", "title": "Stress, Strain and Elastic Moduli", "pages": [150, 151, 152] }
+      ]
+    },
+    {
+      "id": "u8",
+      "number": 8,
+      "title": "Heat and Thermodynamics",
+      "lessons": [
+        { "id": "phy11-u8-carnot-engine", "topic": "8.1", "title": "First and Second Laws of Thermodynamics and Carnot Engine", "pages": [175, 176, 177] }
+      ]
+    },
+    {
+      "id": "u9",
+      "number": 9,
+      "title": "Waves",
+      "lessons": [
+        { "id": "phy11-u9-simple-harmonic", "topic": "9.1", "title": "Simple Harmonic Motion, Resonance and Doppler Effect", "pages": [200, 201, 202] }
+      ]
+    },
+    {
+      "id": "u10",
+      "number": 10,
+      "title": "Electrostatics",
+      "lessons": [
+        { "id": "phy11-u10-coulombs-law", "topic": "10.1", "title": "Coulomb's Law and Gauss's Law", "pages": [225, 226, 227] }
+      ]
+    },
+    {
+      "id": "u11",
+      "number": 11,
+      "title": "Electricity",
+      "lessons": [
+        { "id": "phy11-u11-kirchhoff", "topic": "11.1", "title": "Ohm's Law, Resistivity and Kirchhoff's Rules", "pages": [250, 251, 252] }
+      ]
+    },
+    {
+      "id": "u12",
+      "number": 12,
+      "title": "Magnetism",
+      "lessons": [
+        { "id": "phy11-u12-ampere-law", "topic": "12.1", "title": "Magnetic Force on Moving Charges and Ampere's Law", "pages": [275, 276, 277] }
+      ]
+    },
+    {
+      "id": "u13",
+      "number": 13,
+      "title": "Relativity",
+      "lessons": [
+        { "id": "phy11-u13-special-relativity", "topic": "13.1", "title": "Postulates of Special Relativity and Mass-Energy Equivalence", "pages": [300, 301, 302] }
+      ]
+    },
+    {
+      "id": "u14",
+      "number": 14,
+      "title": "Particle Physics",
+      "lessons": [
+        { "id": "phy11-u14-standard-model", "topic": "14.1", "title": "Fundamental Forces and the Standard Model of Quarks and Leptons", "pages": [325, 326, 327] }
+      ]
     }
   ]
 }

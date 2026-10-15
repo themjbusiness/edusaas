@@ -1,0 +1,93 @@
+{
+  "id": "cs11",
+  "pdf": "../../books/cs11.pdf",
+  "pdf_page_offset": 0,
+  "subject": "Computer Science",
+  "grade": "Grade 11",
+  "board": "FBISE",
+  "publisher": "National Book Foundation (Federal Textbook Board)",
+  "voice": "en-IN-PrabhatNeural",
+  "rate": "+0%",
+  "units": [
+    {
+      "id": "u1",
+      "number": 1,
+      "title": "Overview of Computer System",
+      "lessons": [
+        { "id": "cs11-u1-hardware-software", "topic": "1.1", "title": "Hardware, Software and Information Processing Cycle", "pages": [1, 2, 3] }
+      ]
+    },
+    {
+      "id": "u2",
+      "number": 2,
+      "title": "Computer Architecture",
+      "lessons": [
+        { "id": "cs11-u2-von-neumann", "topic": "2.1", "title": "Von Neumann Architecture and System Buses", "pages": [25, 26, 27] }
+      ]
+    },
+    {
+      "id": "u3",
+      "number": 3,
+      "title": "Central Processing Unit",
+      "lessons": [
+        { "id": "cs11-u3-registers-alu", "topic": "3.1", "title": "CPU Registers, ALU and Instruction Fetch-Execute Cycle", "pages": [45, 46, 47] }
+      ]
+    },
+    {
+      "id": "u4",
+      "number": 4,
+      "title": "Inside the System Unit",
+      "lessons": [
+        { "id": "cs11-u4-memory-expansion", "topic": "4.1", "title": "Primary Memory, ROM, RAM and Expansion Slots", "pages": [65, 66, 67] }
+      ]
+    },
+    {
+      "id": "u5",
+      "number": 5,
+      "title": "Network Communication",
+      "lessons": [
+        { "id": "cs11-u5-topologies", "topic": "5.1", "title": "Network Topologies, LAN, WAN and OSI Model", "pages": [85, 86, 87] }
+      ]
+    },
+    {
+      "id": "u6",
+      "number": 6,
+      "title": "Wireless Communication",
+      "lessons": [
+        { "id": "cs11-u6-cellular-wifi", "topic": "6.1", "title": "Wi-Fi, Bluetooth, Satellite and Cellular Standards", "pages": [105, 106, 107] }
+      ]
+    },
+    {
+      "id": "u7",
+      "number": 7,
+      "title": "Database Fundamentals",
+      "lessons": [
+        { "id": "cs11-u7-relational-model", "topic": "7.1", "title": "Entities, Attributes, Relationships and Keys", "pages": [125, 126, 127] }
+      ]
+    },
+    {
+      "id": "u8",
+      "number": 8,
+      "title": "Database Management Systems",
+      "lessons": [
+        { "id": "cs11-u8-sql-basics", "topic": "8.1", "title": "DDL, DML, SQL Queries and Normalization (1NF, 2NF, 3NF)", "pages": [145, 146, 147] }
+      ]
+    },
+    {
+      "id": "u9",
+      "number": 9,
+      "title": "Data Security and Privacy",
+      "lessons": [
+        { "id": "cs11-u9-cybersecurity", "topic": "9.1", "title": "Threats, Encryption, Authentication and Firewalls", "pages": [165, 166, 167] }
+      ]
+    },
+    {
+      "id": "u10",
+      "number": 10,
+      "title": "Operating System Fundamentals",
+      "lessons": [
+        { "id": "cs11-u10-process-memory-management", "topic": "10.1", "title": "Process Scheduling, Memory Management and File Systems", "pages": [185, 186, 187] }
+      ]
+    }
+  ]
+}
