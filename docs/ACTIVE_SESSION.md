@@ -123,7 +123,8 @@ All 5 core features of the **v1.2 Pilot Term Release** on branch `release/v1.2-p
 ---
 
 ## 4. Next Deployment & Pilot Handover Steps
-1. Push branch `release/v1.2-pilot-features` to remote Git repository.
+1. [x] Push branch `release/v1.2-pilot-features` to remote Git repository (`origin/release/v1.2-pilot-features`) — COMPLETED.
 2. Verify Render staging/production deployment environment variables (`DEMO_MODE`, `SHOW_DRAFT_LESSONS`, `PAID_MESSAGING`).
 3. Prepare pilot demonstration walkthrough for partner FBISE colleges (Margalla Heights College).
+
 
