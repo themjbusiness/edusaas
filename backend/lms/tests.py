@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from .models import Clearance, Lesson, LessonProgress, Notification, OTPCode, QuizAttempt, User
+from .models import Clearance, College, Lesson, LessonProgress, Notification, OTPCode, QuizAttempt, User
 from .fields import hash_phone
 
 A_TEACHER, B_TEACHER = "+923991110001", "+923991110002"
@@ -1780,6 +1780,15 @@ class SyllabusPipelineTest(ApiBase):
         self.assertEqual(status_review, 200)
         self.assertEqual(data_review["id"], draft_lesson.id)
         self.assertEqual(data_review["status"], "draft")
+
+    def test_institution_info_returns_dynamic_college_name(self):
+        college = College.objects.first()
+        college.name = "Custom College Name"
+        college.save()
+        status, data = self.call("get", "institution")
+        self.assertEqual(status, 200)
+        self.assertEqual(data["name"], "Custom College Name")
+        self.assertEqual(data["affiliation"], "Affiliated with Federal Board (FBISE), Islamabad")
 
 
 

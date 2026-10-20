@@ -16,7 +16,7 @@ from django.utils.dateparse import parse_date
 
 from . import notify, push
 from .auth import ApiError, api, issue_token, normalize_phone, request_otp, verify_otp
-from .models import (Attendance, Clearance, Lesson, LessonProgress, QuizAttempt, Notification, PushSubscription,
+from .models import (Attendance, Clearance, College, Lesson, LessonProgress, QuizAttempt, Notification, PushSubscription,
                      SchoolClass, StudentProfile, Subject, SubjectRequest, TeachingAssignment, User)
 from .fields import hash_phone
 
@@ -898,7 +898,18 @@ def push_unsubscribe(request):
     return {"removed": deleted}
 
 
-# ---------- demo helper ----------
+# ---------- institution metadata & demo helper ----------
+
+@api()
+def institution_info(request):
+    """Public institution metadata for login branding and verification headers."""
+    c = College.objects.first()
+    return {
+        "name": c.name if c else "EduSaas Institution",
+        "affiliation": "Affiliated with Federal Board (FBISE), Islamabad",
+        "isDemo": settings.DEMO_MODE,
+    }
+
 
 @api()
 def demo_accounts(request):

@@ -37,6 +37,7 @@ urlpatterns = [
     path("parent/children/<str:student_id>/subjects/<str:code>", api.parent_child_subject),
     path("parent/settings", api.parent_settings),
     path("messages", api.messages),
+    path("institution", api.institution_info),
     path("demo/accounts", api.demo_accounts),
     path("admin/overview", admin_api.overview),
     path("admin/audit", admin_api.audit_log),
