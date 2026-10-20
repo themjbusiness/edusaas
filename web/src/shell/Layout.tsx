@@ -109,6 +109,82 @@ export function Layout({ children, route }: { children: React.ReactNode; route?:
               )}
             </div>
           </a>
+          {/* Public Nav Links (when not signed in) */}
+          {!me && (
+            <nav className="hidden md:flex items-center gap-6" aria-label="Public navigation">
+              <button
+                type="button"
+                onClick={() => {
+                  if (location.hash && location.hash !== '#/' && location.hash !== '#/home' && location.hash !== '') {
+                    window.location.hash = '#/';
+                    setTimeout(() => document.getElementById('workflow')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  } else {
+                    document.getElementById('workflow')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="font-label-md text-[13px] font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0"
+              >
+                How It Works
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (location.hash && location.hash !== '#/' && location.hash !== '#/home' && location.hash !== '') {
+                    window.location.hash = '#/';
+                    setTimeout(() => document.getElementById('simulator')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  } else {
+                    document.getElementById('simulator')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="font-label-md text-[13px] font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0"
+              >
+                Catch-Up Simulator
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (location.hash && location.hash !== '#/' && location.hash !== '#/home' && location.hash !== '') {
+                    window.location.hash = '#/';
+                    setTimeout(() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  } else {
+                    document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="font-label-md text-[13px] font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0"
+              >
+                Attendance ROI
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (location.hash && location.hash !== '#/' && location.hash !== '#/home' && location.hash !== '') {
+                    window.location.hash = '#/';
+                    setTimeout(() => document.getElementById('curriculum')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  } else {
+                    document.getElementById('curriculum')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="font-label-md text-[13px] font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0"
+              >
+                Curriculum
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (location.hash && location.hash !== '#/' && location.hash !== '#/home' && location.hash !== '') {
+                    window.location.hash = '#/';
+                    setTimeout(() => document.getElementById('roles')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  } else {
+                    document.getElementById('roles')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="font-label-md text-[13px] font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0"
+              >
+                Role Portals
+              </button>
+            </nav>
+          )}
+
           <div className="flex items-center gap-space-xs">
             <button aria-label="Toggle Theme" onClick={theme} className="w-11 h-11 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer" type="button">
               <span className="material-symbols-outlined text-[20px]">dark_mode</span>

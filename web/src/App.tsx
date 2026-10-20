@@ -105,7 +105,7 @@ export default function App() {
     if (route.name === 'login') {
       return <Layout route={route}><Login onSignedIn={onSignedIn} /></Layout>;
     }
-    return <Layout route={{ name: 'home', args: [] }}><HomePage /></Layout>;
+    return <Layout route={{ name: 'home', args: [] }}><HomePage onSignedIn={onSignedIn} /></Layout>;
   }
   if (!me) return <Layout>{loadError ? <ErrorCard error={loadError} onRetry={() => { setToken(null); setHasToken(false); go('#/login'); }} /> : <Skeleton rows={2} />}</Layout>;
   const def = ROUTES[route.name];
