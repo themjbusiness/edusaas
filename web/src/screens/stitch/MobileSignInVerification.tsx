@@ -184,7 +184,7 @@ export function MobileSignInVerification() {
 </div>
 {/* Institutional Footer / Helpline link */}
 <div className="text-center py-2 text-xs text-text-secondary space-y-1">
-<p>Margalla Heights College · Affiliated with Federal Board (FBISE)</p>
+<p>Authorized Institutional Portal · Affiliated with Federal Board (FBISE)</p>
 <div className="flex items-center justify-center gap-3 text-secondary-teal font-medium">
 <a className="hover:underline" href="#helpdesk">Registrar Helpdesk</a>
 <span>·</span>

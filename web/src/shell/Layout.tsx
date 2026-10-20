@@ -100,7 +100,14 @@ export function Layout({ children, route }: { children: React.ReactNode; route?:
             <span className="inline-grid place-items-center w-8 h-8 rounded-lg bg-primary text-on-primary shrink-0">
               <span className="material-symbols-outlined text-[20px]">book</span>
             </span>
-            <span className="font-headline-sm text-headline-sm text-primary tracking-tight truncate">EduSaas</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-headline-sm text-headline-sm text-primary tracking-tight truncate leading-tight">EduSaas</span>
+              {me?.college && (
+                <span className="font-label-sm text-[11px] text-on-surface-variant font-medium truncate max-w-[170px] sm:max-w-xs md:max-w-md leading-none">
+                  {me.college}
+                </span>
+              )}
+            </div>
           </a>
           <div className="flex items-center gap-space-xs">
             <button aria-label="Toggle Theme" onClick={theme} className="w-11 h-11 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer" type="button">

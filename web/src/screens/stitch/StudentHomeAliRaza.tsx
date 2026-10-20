@@ -42,7 +42,7 @@ export function StudentHomeAliRaza() {
                 <div className="flex items-center gap-space-xs mt-1.5 flex-wrap">
                   <span className="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded text-on-surface font-body-sm text-body-sm font-medium">
                     <span className="material-symbols-outlined text-[14px] text-secondary">verified_user</span>
-                    FBISE Margalla Heights
+                    {d.me.college || 'FBISE Affiliated College'}
                   </span>
                   <span className="text-on-surface-variant font-body-sm text-body-sm">
                     · {d.me.class} ({t('Roll {roll}', { roll: d.me.roll || '' })})
@@ -173,7 +173,9 @@ export function StudentHomeAliRaza() {
                 </div>
                 <div>
                   <p className="font-label-lg text-label-lg font-bold text-on-surface">Registration</p>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">Margalla Heights Academic Registry Synchronized</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                    {d.me.college ? `${d.me.college} Academic Registry Synchronized` : 'Academic Registry Synchronized'}
+                  </p>
                 </div>
               </div>
 
@@ -201,7 +203,7 @@ export function StudentHomeAliRaza() {
           <div className="px-2 py-3 text-center mt-auto animate-[fadeIn_1s_ease-out]">
             <p className="font-label-sm text-[11px] text-on-surface-variant flex items-center justify-center gap-1">
               <span className="material-symbols-outlined text-[13px] text-secondary">verified</span>
-              Authorized FBISE Institutional Portal · Margalla Heights College
+              Authorized FBISE Institutional Portal · {d.me.college || 'Federal Board'}
             </p>
           </div>
 

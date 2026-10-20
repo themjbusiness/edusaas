@@ -5,7 +5,6 @@ import { useI18n } from '../../lib/i18n';
 import { useToast } from '../../ui';
 
 interface DemoAccount { name: string; role: string; phone: string; note: string }
-interface InstitutionInfo { name: string; affiliation: string; isDemo: boolean }
 const GROUPS: [string, string][] = [['college_admin', 'College admin'], ['teacher', 'Teachers'], ['student', 'Students'], ['parent', 'Parents']];
 
 export function SignIn({ onSignedIn }: { onSignedIn: (me: Me) => void }) {
@@ -20,12 +19,10 @@ export function SignIn({ onSignedIn }: { onSignedIn: (me: Me) => void }) {
   const [countdown, setCountdown] = useState(30);
   const [sms, setSms] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<DemoAccount[] | null | 'none'>(null);
-  const [institution, setInstitution] = useState<InstitutionInfo | null>(null);
   const codeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     get<DemoAccount[]>('demo/accounts').then(setAccounts, () => setAccounts('none'));
-    get<InstitutionInfo>('institution').then(setInstitution).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -93,14 +90,12 @@ export function SignIn({ onSignedIn }: { onSignedIn: (me: Me) => void }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-label-lg text-label-lg font-semibold text-primary truncate">
-                  {institution?.name || 'EduSaas College'}
+                  FBISE Affiliated Colleges
                 </span>
-                {institution?.isDemo !== false && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-medium">Demo</span>
-                )}
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-medium">Portal</span>
               </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">
-                {institution?.affiliation || 'Affiliated with Federal Board (FBISE), Islamabad'}
+                Federal Board of Intermediate & Secondary Education
               </p>
             </div>
           </div>
@@ -269,7 +264,7 @@ export function SignIn({ onSignedIn }: { onSignedIn: (me: Me) => void }) {
             <div className="min-w-0 flex-1">
               <h3 className="font-label-md text-label-md font-semibold text-primary">Need phone registration update?</h3>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
-                Unregistered numbers cannot create independent accounts. Visit the Academic Records Directorate or call the {institution?.name || 'college'} helpline to bind your current SIM to your FBISE student identifier.
+                Unregistered numbers cannot create independent accounts. Contact your college administration or Academic Records Directorate to register or update your mobile number.
               </p>
             </div>
           </div>

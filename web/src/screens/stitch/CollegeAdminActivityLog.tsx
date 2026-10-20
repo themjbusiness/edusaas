@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useSession } from '../../App';
 import { get } from '../../lib/api';
 import { hm, dayName } from '../../lib/format';
 import { useI18n } from '../../lib/i18n';
@@ -8,6 +9,7 @@ import { ErrorCard, Skeleton } from '../../ui';
 export interface AuditRow { id: number; action: string; type: string; summary: string; actor: string | null; at: string }
 
 export function CollegeAdminActivityLog() {
+  const { me } = useSession();
   const { locale } = useI18n();
   const { data, error, reload } = useLoad(() => get<AuditRow[]>('admin/audit'));
   const [q, setQ] = useState('');
@@ -56,7 +58,7 @@ export function CollegeAdminActivityLog() {
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-[11px]">
               <span className="material-symbols-outlined text-[15px] text-secondary">verified_user</span>
-              Margalla Heights College · Audit Register
+              {me?.college || 'Institution'} · Audit Register
             </span>
             <span className="font-label-sm text-[11px] text-secondary flex items-center gap-1 bg-secondary-container/40 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>

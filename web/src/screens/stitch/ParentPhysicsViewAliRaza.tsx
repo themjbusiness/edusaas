@@ -1,3 +1,4 @@
+import { useSession } from '../../App';
 import { get } from '../../lib/api';
 import { useI18n } from '../../lib/i18n';
 import { useLoad } from '../../lib/useLoad';
@@ -10,6 +11,7 @@ interface ChildSubject {
 }
 
 export function ParentPhysicsViewAliRaza({ args }: { args?: string[] }) {
+  const { me } = useSession();
   const { subj } = useI18n();
   const sid = args?.[0] || '';
   const code = args?.[1] || '';
@@ -51,7 +53,7 @@ export function ParentPhysicsViewAliRaza({ args }: { args?: string[] }) {
                   </span>
                 </div>
                 <p className="font-label-lg text-[14px] text-on-surface font-bold truncate mt-0.5">{d.child.name} · {d.child.class}</p>
-                <p className="font-body-sm text-[12px] text-on-surface-variant truncate">Margalla Heights College</p>
+                <p className="font-body-sm text-[12px] text-on-surface-variant truncate">{me?.college || 'FBISE Affiliated College'}</p>
               </div>
             </div>
             {/* Quick Summary Pills */}

@@ -28,7 +28,7 @@ export function CollegeAdminHomeSubjectRequest() {
 <span className="px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-[10px]">ADMIN</span>
 </div>
 <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
-          Margalla Heights College (Demo) · Islamabad
+          FBISE Affiliated College · Islamabad
         </p>
 </div>
 </div>

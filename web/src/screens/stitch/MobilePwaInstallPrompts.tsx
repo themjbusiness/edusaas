@@ -42,7 +42,7 @@ export function MobilePwaInstallPrompts() {
 <div className="bg-surface-container-low rounded-lg p-2.5 flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
 <div className="flex items-center gap-1.5">
 <span className="material-symbols-outlined text-secondary text-[18px]">account_balance</span>
-<span className="truncate">Margalla Heights College (FBISE 4021)</span>
+<span className="truncate">FBISE Affiliated College</span>
 </div>
 <span className="font-label-sm text-label-sm text-secondary font-semibold">92.4% Attd.</span>
 </div>
