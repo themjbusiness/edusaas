@@ -149,17 +149,21 @@ def api(methods=("GET",), roles=None):
 
 
 class PhoneBackend(ModelBackend):
-    """Allow superusers/staff to log into /admin using their plain phone number or hash."""
+    """Allow superusers/staff to log into /admin using 'admin', their plain phone number, or hash."""
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None:
             username = kwargs.get(User.USERNAME_FIELD)
         if not username or not password:
             return None
-        try:
-            phone_hash = hash_phone(normalize_phone(username))
-        except Exception:
-            phone_hash = username
-        user = User.objects.filter(phone_number_hash=phone_hash).first()
+        user = None
+        if str(username).strip().lower() == "admin":
+            user = User.objects.filter(is_superuser=True, is_staff=True).first()
+        if not user:
+            try:
+                phone_hash = hash_phone(normalize_phone(username))
+            except Exception:
+                phone_hash = username
+            user = User.objects.filter(phone_number_hash=phone_hash).first()
         if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
         return None
