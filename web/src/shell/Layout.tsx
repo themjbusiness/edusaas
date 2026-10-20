@@ -29,7 +29,7 @@ export function Layout({ children, route }: { children: React.ReactNode; route?:
   const activeRoute = route?.name;
 
   function renderBreadcrumbs() {
-    if (!route) return <span className="hidden sm:inline font-label-md text-label-md text-on-surface-variant truncate">| Home</span>;
+    if (!route || !me) return null;
     
     const crumbs = [];
     if (me?.role === 'student' && ['subject', 'lesson', 'quiz'].includes(route.name)) {
@@ -113,9 +113,16 @@ export function Layout({ children, route }: { children: React.ReactNode; route?:
             <button aria-label="Toggle Theme" onClick={theme} className="w-11 h-11 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer" type="button">
               <span className="material-symbols-outlined text-[20px]">dark_mode</span>
             </button>
-            <a href="#/" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80">
-              <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
-            </a>
+            {!me ? (
+              <a href="#/login" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-on-primary font-label-md text-[13px] font-semibold shadow-xs hover:bg-primary-container transition-all no-underline">
+                <span>Sign In</span>
+                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </a>
+            ) : (
+              <a href="#/" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80">
+                <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+              </a>
+            )}
           </div>
         </div>
       </header>

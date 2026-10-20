@@ -4,6 +4,7 @@ import { useI18n } from './lib/i18n';
 import { disablePush, pushSupport } from './lib/push';
 import { go, useRoute } from './lib/router';
 import { ErrorCard, Skeleton } from './ui';
+import { HomePage } from './screens/HomePage';
 import { SignIn as Login } from './screens/stitch/SignIn';
 import Gallery from './screens/Gallery';
 import { StudentHomeAliRaza as StudentHome } from './screens/stitch/StudentHomeAliRaza';
@@ -58,6 +59,7 @@ const ROUTES: Record<string, { roles: Role[]; screen: Screen; nav?: string; play
   people: { roles: ['college_admin'], screen: People },
   classes: { roles: ['college_admin'], screen: Classes },
   import: { roles: ['college_admin'], screen: Import },
+  landing: { roles: ['student', 'teacher', 'parent', 'college_admin'], screen: HomePage },
 };
 const HOME: Record<Role, string> = { student: '#/home', teacher: '#/teacher', parent: '#/parent', college_admin: '#/admin' };
 
@@ -98,10 +100,12 @@ export default function App() {
 
   // Routing decisions
   if (route.name === 'gallery') return <Layout><Gallery /></Layout>;
-  if (route.name === 'logout') { if (hasToken || me) signOut(); else go('#/login'); return null; }
+  if (route.name === 'logout') { if (hasToken || me) signOut(); else go('#/'); return null; }
   if (!hasToken) {
-    if (route.name !== 'login') go('#/login');
-    return <Layout><Login onSignedIn={onSignedIn} /></Layout>;
+    if (route.name === 'login') {
+      return <Layout route={route}><Login onSignedIn={onSignedIn} /></Layout>;
+    }
+    return <Layout route={{ name: 'home', args: [] }}><HomePage /></Layout>;
   }
   if (!me) return <Layout>{loadError ? <ErrorCard error={loadError} onRetry={() => { setToken(null); setHasToken(false); go('#/login'); }} /> : <Skeleton rows={2} />}</Layout>;
   const def = ROUTES[route.name];
